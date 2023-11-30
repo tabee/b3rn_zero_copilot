@@ -3,9 +3,10 @@ import os
 import time
 import redis
 from config import set_enviroment_variables
-from langchain.cache import RedisCache
+from langchain.cache import RedisSemanticCache
 from langchain.chat_models import ChatOpenAI
 from langchain.globals import set_llm_cache
+from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
@@ -14,13 +15,14 @@ from langchain.schema.runnable import RunnablePassthrough
 def main():
     '''Main function to run the app. '''
 
-    set_enviroment_variables()
+    set_enviroment_variables()  
 
-    # Redis Cache
-    redis_client = redis.Redis.from_url(os.environ.get("REDIS_URL"))
-    set_llm_cache(RedisCache(redis_client))
-
-
+    set_llm_cache(
+        RedisSemanticCache(
+            redis_url=os.environ.get("REDIS_URL"), 
+            embedding=OpenAIEmbeddings()
+            )
+        )
 
     prompt = ChatPromptTemplate.from_messages(
         [

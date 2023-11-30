@@ -1,24 +1,23 @@
 ''' Main file to run the app. '''
+import os
 import time
+import redis
+from config import set_enviroment_variables
+from langchain.cache import RedisCache
 from langchain.chat_models import ChatOpenAI
+from langchain.globals import set_llm_cache
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
-from config import set_enviroment_variables
-from langchain.cache import RedisCache
-from langchain.globals import set_llm_cache
-import redis
+
 
 def main():
     '''Main function to run the app. '''
 
     set_enviroment_variables()
 
-
-    # Set the cache to use Redis
-    # redis_url = "redis+sentinel://:secret-pass@sentinel-host:26379/mymaster/0"
-    redis_url = "redis://localhost:6379"
-    redis_client = redis.Redis.from_url(redis_url)
+    # Redis Cache
+    redis_client = redis.Redis.from_url(os.environ.get("REDIS_URL"))
     set_llm_cache(RedisCache(redis_client))
 
 

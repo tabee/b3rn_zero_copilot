@@ -10,3 +10,4 @@ def set_enviroment_variables():
     ''' This function sets all the environment variables in the config.toml file. '''
     config = _load_config()
     os.environ["OPENAI_API_KEY"] = config["keys"]["OPENAI_API_KEY"]
+    os.environ["REDIS_URL"] = config["urls"]["REDIS_URL"]

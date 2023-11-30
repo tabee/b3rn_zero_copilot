@@ -1,7 +1,12 @@
 ''' This file is used to load the config.toml file and return it as a dictionary. '''
+import os
 import toml
 
-def load_config():
+def _load_config():
     ''' This function loads the config.toml file and returns it as a dictionary.'''
-    config = toml.load("config.toml")
-    return config
+    return toml.load("config.toml")
+
+def set_enviroment_variables():
+    ''' This function sets all the environment variables in the config.toml file. '''
+    config = _load_config()
+    os.environ["OPENAI_API_KEY"] = config["keys"]["OPENAI_API_KEY"]

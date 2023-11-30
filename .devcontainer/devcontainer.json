@@ -1,20 +1,22 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/universal:2",
-    "hostRequirements": {
-      "cpus": 4
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "hostRequirements": {
+    "cpus": 4
+  },
+  "waitFor": "onCreateCommand",
+  "updateContentCommand": "python3 -m pip install -r requirements.txt",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y redis-server",
+  "postStartCommand": "redis-server --daemonize yes",
+  "customizations": {
+    "codespaces": {
+      "openFiles": []
     },
-    "waitFor": "onCreateCommand",
-    "updateContentCommand": "python3 -m pip install -r requirements.txt",
-    "postCreateCommand": "",
-    "customizations": {
-      "codespaces": {
-        "openFiles": []
-      },
-      "vscode": {
-        "extensions": [
-          "ms-toolsai.jupyter",
-          "ms-python.python"
-        ]
-      }
+    "vscode": {
+      "extensions": [
+        "ms-toolsai.jupyter",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
     }
   }
+}

@@ -1,0 +1,4 @@
+{
+    "name": "b3rn zero copilot",
+    "postCreateCommand": "docker-compose up -d"
+}

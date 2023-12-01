@@ -7,4 +7,4 @@ services:
   langchain:
     build: ./langchain-container
     environment:
-      - OPENAI_API_KEY=00000000000000000000000000000000000000000000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Reference the environment variable

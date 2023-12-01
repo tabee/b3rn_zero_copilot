@@ -1,6 +1,6 @@
 {
     "name": "Docker Compose",
-    "dockerComposeFile": ["docker-compose.yml"], // Provide the path to your docker-compose file(s)
+    "dockerComposeFile": ["docker-compose.yml"],
     "service": "fastapi", // Specify the service you want to start (change to the desired service name)
     "workspaceFolder": "/workspace",
     "extensions": [],

@@ -1,40 +1,16 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-from langchain.schema.runnable import RunnablePassthrough
-
 from fastapi import FastAPI
+import httpx
+from starlette.responses import JSONResponse
 
 app = FastAPI()
 
+# Eine Instanz des HTTP-Clients erstellen
+http_client = httpx.AsyncClient()
+
+def some_function():
+    return "Hello Langchain"
+
 @app.get("/langchain")
 def hello_langchain():
-    
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "Write out the following equation using algebraic symbols then solve it. Use the format\n\nEQUATION:...\nSOLUTION:...\n\n",
-            ),
-            ("human", "{equation_statement}"),
-        ]
-    )
-    model = ChatOpenAI(temperature=0)
-    runnable = (
-        {"equation_statement": RunnablePassthrough()} | prompt | model | StrOutputParser()
-    )
-
-    print(runnable.invoke("x raised to the third plus seven equals 12"))
-    
-    return {"message": "Hello from Langchain"}
-
-
-
-
-
-
-
-
-
-
-
+    result = some_function()
+    return {"message": result}

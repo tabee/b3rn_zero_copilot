@@ -4,7 +4,14 @@ services:
     build: ./fastapi-container
     ports:
       - "8000:80"
+    networks:
+      - langchain-network
+
   langchain:
     build: ./langchain-container
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}  # Reference the environment variable
+    networks:
+      - langchain-network
+networks:
+  langchain-network:

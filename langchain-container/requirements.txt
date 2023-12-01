@@ -2,3 +2,5 @@ openai
 langchain
 faiss-cpu
 tiktoken
+httpx
+fastapi

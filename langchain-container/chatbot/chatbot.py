@@ -3,6 +3,18 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/hello-langchain")
+def hello_langchain():
+    return {"message": "Hello from Langchain"}
+
+
+
+
+
 prompt = ChatPromptTemplate.from_messages(
     [
         (

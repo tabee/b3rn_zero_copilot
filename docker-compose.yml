@@ -1,12 +1,5 @@
 version: '3.8'
 services:
-  fastapi:
-    build: ./fastapi-container
-    ports:
-      - "8000:80"
-    networks:
-      - langchain-network
-
   langchain:
     build: ./langchain-container
     ports:
@@ -14,7 +7,16 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
-      - langchain-network
+      - langchain_network
+  
+  fastapi:
+    build: ./fastapi-container
+    ports:
+      - "8000:80"
+    depends_on:
+      - langchain  # Abhängigkeit vom langchain-Dienst
+    networks:
+      - langchain_network
 
 networks:
-  langchain-network:
+  langchain_network:

@@ -9,9 +9,12 @@ services:
 
   langchain:
     build: ./langchain-container
+    ports:
+      - "8001:80"  # Port Weiterleitung vom Host-Port 8001 zum Container-Port 80
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Reference the environment variable
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - langchain-network
+
 networks:
   langchain-network:

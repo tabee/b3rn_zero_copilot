@@ -9,24 +9,21 @@ app = FastAPI()
 
 @app.get("/hello-langchain")
 def hello_langchain():
+    
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Write out the following equation using algebraic symbols then solve it. Use the format\n\nEQUATION:...\nSOLUTION:...\n\n",
+            ),
+            ("human", "{equation_statement}"),
+        ]
+    )
+    model = ChatOpenAI(temperature=0)
+    runnable = (
+        {"equation_statement": RunnablePassthrough()} | prompt | model | StrOutputParser()
+    )
+
+    print(runnable.invoke("x raised to the third plus seven equals 12"))
+    
     return {"message": "Hello from Langchain"}
-
-
-
-
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            "Write out the following equation using algebraic symbols then solve it. Use the format\n\nEQUATION:...\nSOLUTION:...\n\n",
-        ),
-        ("human", "{equation_statement}"),
-    ]
-)
-model = ChatOpenAI(temperature=0)
-runnable = (
-    {"equation_statement": RunnablePassthrough()} | prompt | model | StrOutputParser()
-)
-
-print(runnable.invoke("x raised to the third plus seven equals 12"))

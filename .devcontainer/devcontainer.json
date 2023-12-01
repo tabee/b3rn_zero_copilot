@@ -1,6 +1,6 @@
 {
   "name": "FastAPI and Langchain Development",
-  "dockerComposeFile": "/workspaces/b3rn_zero_copilot/docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "fastapi",
   "workspaceFolder": "/app",
   "extensions": ["ms-python.python", "ms-vscode.vscode-docker"],

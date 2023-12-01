@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - LANGCHAIN_URL=http://langchain:5000
+    depends_on:
+      - langchain
+
+  langchain:
+    build: ./langchain
+    ports:
+      - "5000:5000"

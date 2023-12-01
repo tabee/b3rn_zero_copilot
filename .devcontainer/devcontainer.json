@@ -1,23 +1,10 @@
 {
-  "build": {
-    "dockerfile": "Dockerfile", // Verweis auf Ihr benutzerdefiniertes Dockerfile
-    "context": "."
-  },
-  "hostRequirements": {
-    "cpus": 4
-  },
-  "waitFor": "onCreateCommand",
-  "updateContentCommand": "python3 -m pip install -r requirements.txt",
-  "postStartCommand": "redis-server --loadmodule /usr/lib/redis/modules/redisearch.so --daemonize yes",
-  "customizations": {
-    "codespaces": {
-      "openFiles": []
-    },
-    "vscode": {
-      "extensions": [
-        "ms-toolsai.jupyter",
-        "ms-python.python"
-      ]
-    }
-  }
+  "name": "FastAPI and Langchain Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "fastapi",
+  "workspaceFolder": "/app",
+  "extensions": ["ms-python.python", "ms-vscode.vscode-docker"],
+  "forwardPorts": [8000, 5000],
+  "postCreateCommand": "pip install -r requirements.txt",
+  "remoteUser": "root"
 }

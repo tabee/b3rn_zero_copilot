@@ -7,4 +7,4 @@ services:
   langchain:
     build: ./langchain-container
     environment:
-      - OPENAI_API_KEY=your_api_key_here
+      - OPENAI_API_KEY=00000000000000000000000000000000000000000000

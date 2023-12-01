@@ -8,4 +8,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./chatbot /chatbot
 
-CMD ["python", "chatbot/chatbot.py"]
+CMD ["python", "/chatbot/chatbot.py"]
+

@@ -10,8 +10,12 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    res = chuck_norris_joke_about(topic="Pferde")
-   
+    res = chuck_norris_joke_about(topic="Ziegelsteine")
     print(res)
-
     return {"Jocke": res}
+
+
+@app.get("/joke/{topic}")
+def get_joke(topic: str):
+    joke = chuck_norris_joke_about(topic=topic)
+    return {"Joke": joke}

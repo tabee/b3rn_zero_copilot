@@ -18,6 +18,6 @@ def chuck_norris_joke_about(topic="Elefanten"):
         {"topic": RunnablePassthrough()} | prompt | model | StrOutputParser()
     )
 
-    result = runnable.invoke("Elefanten")
+    result = runnable.invoke(topic)
     print(result)
     return result

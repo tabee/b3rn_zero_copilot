@@ -12,13 +12,22 @@ def some_function():
 
 @app.get("/")
 def root():
-    result = some_function()
-    return {"message": result}
+    return {"message": some_function()}
 
 @app.get("/call-langchain")
 async def call_langchain():
     try:
         response = await http_client.get("http://langchain:8000")
+        return response.json()
+    except httpx.RequestError as exc:
+        print(f"Anfrage fehlgeschlagen: {exc}")
+        # Fehlerbehandlung, wenn die Anfrage fehlschlägt
+        return JSONResponse(status_code=500, content={"message": "Langchain-Service ist nicht erreichbar"})
+
+@app.get("/joke/{topic}")
+async def call_langchain(topic: str):
+    try:
+        response = await http_client.get(f"http://langchain:8000/joke/{topic}")
         return response.json()
     except httpx.RequestError as exc:
         print(f"Anfrage fehlgeschlagen: {exc}")

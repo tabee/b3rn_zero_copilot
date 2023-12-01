@@ -18,7 +18,7 @@ def root():
 @app.get("/call-langchain")
 async def call_langchain():
     try:
-        response = await http_client.get("http://langchain:80/hello-langchain")
+        response = await http_client.get("http://langchain:80/langchain")
         return response.json()
     except httpx.RequestError as exc:
         print(f"Anfrage fehlgeschlagen: {exc}")

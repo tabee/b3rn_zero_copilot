@@ -7,7 +7,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/hello-langchain")
+@app.get("/langchain")
 def hello_langchain():
     
     prompt = ChatPromptTemplate.from_messages(
@@ -27,3 +27,14 @@ def hello_langchain():
     print(runnable.invoke("x raised to the third plus seven equals 12"))
     
     return {"message": "Hello from Langchain"}
+
+
+
+
+
+
+
+
+
+
+

@@ -3,20 +3,20 @@ services:
   langchain:
     build: ./langchain-container
     ports:
-      - "8001:80"  # Port Weiterleitung vom Host-Port 8001 zum Container-Port 80
+      - "8000:8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
-      - langchain_network
-  
+      - mein-netzwerk
+
   fastapi:
     build: ./fastapi-container
     ports:
-      - "8000:80"
-    depends_on:
-      - langchain  # Abhängigkeit vom langchain-Dienst
+      - "80:80"
     networks:
-      - langchain_network
+      - mein-netzwerk
+    depends_on:
+      - langchain
 
 networks:
-  langchain_network:
+  mein-netzwerk:

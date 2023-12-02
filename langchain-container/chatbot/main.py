@@ -1,7 +1,7 @@
-from concurrent import futures
 import grpc
 import service_pb2
 import service_pb2_grpc
+from concurrent import futures
 from chuck_norris import chuck_norris_joke_about
 
 class PromptService(service_pb2_grpc.PromptServiceServicer):
@@ -17,8 +17,8 @@ def serve():
     server.start()
     server.wait_for_termination()
 
-serve()
-if __name__ == '__main__':
-    print("Starting server. Listening on port 50051.")
-    serve()
-    print("Server stopped.")
+# serve()
+# if __name__ == '__main__':
+#     print("Starting server. Listening on port 50051.")
+#     serve()
+#     print("Server stopped.")

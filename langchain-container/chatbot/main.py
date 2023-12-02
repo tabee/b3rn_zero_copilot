@@ -17,8 +17,5 @@ def serve():
     server.start()
     server.wait_for_termination()
 
-# serve()
-# if __name__ == '__main__':
-#     print("Starting server. Listening on port 50051.")
-#     serve()
-#     print("Server stopped.")
+# start the server
+serve()

@@ -7,11 +7,14 @@ WORKDIR /chatbot
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# FastAPI und Uvicorn installieren
-RUN pip install fastapi uvicorn
-
 # Kopieren des chatbot-Codes in den Container
 COPY ./chatbot /chatbot
+# Kopieren der .proto-Datei in den Container
+# Unschön so, @todo: separate Docker und dann diesem Docker anhängen wäre besser.
+COPY ./service.proto .
+
+# Generieren des gRPC-Codes
+RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. service.proto
 
 # FastAPI-Server starten
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,5 +1,8 @@
-from fastapi import FastAPI
 import httpx
+import grpc
+import service_pb2
+import service_pb2_grpc
+from fastapi import FastAPI
 from starlette.responses import JSONResponse
 
 app = FastAPI()
@@ -8,28 +11,20 @@ app = FastAPI()
 http_client = httpx.AsyncClient()
 
 def some_function():
-    return "Hello World"
+    return "Hello fastapi-container!"
 
 @app.get("/")
 def root():
     return {"message": some_function()}
 
-@app.get("/call-langchain")
-async def call_langchain():
+@app.get("/call-grpc")
+def call_grpc():
     try:
-        response = await http_client.get("http://langchain:8000")
-        return response.json()
+        with grpc.insecure_channel('langchain:50051') as channel:
+            stub = service_pb2_grpc.PromptServiceStub(channel)
+            response = stub.GetResponse(service_pb2.PromptRequest(prompt='Hallo Welt'))
+            print("PromptService client received: " + response.answer)
+            return response.answer
     except httpx.RequestError as exc:
         print(f"Anfrage fehlgeschlagen: {exc}")
-        # Fehlerbehandlung, wenn die Anfrage fehlschlägt
-        return JSONResponse(status_code=500, content={"message": "Langchain-Service ist nicht erreichbar"})
-
-@app.get("/joke/{topic}")
-async def call_langchain(topic: str):
-    try:
-        response = await http_client.get(f"http://langchain:8000/joke/{topic}")
-        return response.json()
-    except httpx.RequestError as exc:
-        print(f"Anfrage fehlgeschlagen: {exc}")
-        # Fehlerbehandlung, wenn die Anfrage fehlschlägt
-        return JSONResponse(status_code=500, content={"message": "Langchain-Service ist nicht erreichbar"})
+        return JSONResponse(status_code=500, content={"message": "gRPC-Service ist nicht erreichbar"})

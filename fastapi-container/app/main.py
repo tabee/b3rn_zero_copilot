@@ -19,6 +19,7 @@ def root():
 
 @app.get("/call-grpc")
 def call_grpc():
+    '''Call the gRPC service with a default parameter'''
     try:
         with grpc.insecure_channel('langchain:50051') as channel:
             stub = service_pb2_grpc.PromptServiceStub(channel)

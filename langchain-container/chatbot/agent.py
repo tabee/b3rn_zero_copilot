@@ -4,7 +4,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 
-def run_agent(user_input="Tell me something about the next open ai model!"):
+async def run_agent(user_input="Tell me something about the next open ai model!"):
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -22,9 +22,12 @@ def run_agent(user_input="Tell me something about the next open ai model!"):
         {"user_input": RunnablePassthrough()} | prompt | model | StrOutputParser()
     )
 
-    result = runnable.invoke(user_input)
-    print(result)
-    return result
+    #result = await runnable.ainvoke(user_input)
+    for chunk in runnable.stream(user_input):
+        print(chunk, end="", flush=True)
+    return chunk
 
 if __name__ == "__main__":
-    run_agent()
+    import asyncio
+    asyncio.run(run_agent(user_input="wie viele Einwohner hat Thailand?"))
+

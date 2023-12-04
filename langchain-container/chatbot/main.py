@@ -3,12 +3,17 @@ import service_pb2
 import service_pb2_grpc
 from concurrent import futures
 from chuck_norris import chuck_norris_joke_about
+from agent import run_agent
 
 class PromptService(service_pb2_grpc.PromptServiceServicer):
     def GetResponse(self, request, context):
         res = chuck_norris_joke_about(topic=request.prompt)
         print(res)
         return service_pb2.PromptReply(answer='Joke: ' + res)
+    def RunAgent(self, request, context):
+        res = run_agent(user_input=request.prompt)
+        print(res)
+        return service_pb2.AgentReply(answer=res)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

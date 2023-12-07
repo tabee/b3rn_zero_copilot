@@ -43,16 +43,3 @@ def call_grpc_parameter(parameter: str):
     except httpx.RequestError as exc:
         print(f"Anfrage fehlgeschlagen: {exc}")
         return JSONResponse(status_code=500, content={"message": "gRPC-Service call_grpc_parameter ist nicht erreichbar"})
-
-@app.get("/agent/{prompt}")
-def run_agent(prompt: str):
-    '''Call the gRPC-agent service with the given prompt'''
-    try:
-        with grpc.insecure_channel('langchain:50051') as channel:
-            stub = service_pb2_grpc.PromptServiceStub(channel)
-            response = stub.RunAgent(service_pb2.PromptRequest(prompt=prompt))
-            print("PromptService client received: " + response.answer)
-            return response.answer
-    except httpx.RequestError as exc:
-        print(f"Anfrage fehlgeschlagen: {exc}")
-        return JSONResponse(status_code=500, content={"message": "gRPC-Service run_agent ist nicht erreichbar"})

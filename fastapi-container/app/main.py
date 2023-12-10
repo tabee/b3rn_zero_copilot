@@ -3,6 +3,7 @@ import grpc
 import service_pb2
 import service_pb2_grpc
 from fastapi import FastAPI
+from contextlib import contextmanager
 from starlette.responses import StreamingResponse
 from starlette.responses import JSONResponse
 
@@ -45,24 +46,47 @@ def call_grpc_parameter(parameter: str):
         print(f"Anfrage fehlgeschlagen: {exc}")
         return JSONResponse(status_code=500, content={"message": "gRPC-Service call_grpc_parameter ist nicht erreichbar"})
 
-@app.get("/agent/{parameter}")
-def call_agent_for(parameter: str):
-    '''Call the gRPC agent service with the given parameter'''
-    try:
-        with grpc.insecure_channel('langchain:50051') as channel:
-            stub = service_pb2_grpc.PromptServiceStub(channel)
-            stream = stub.GetResponseStream(service_pb2.PromptRequest(prompt=parameter))
-            
-            responses = []
-            for response in stream:
-                print(response.answer)
-                # Hier verarbeiten Sie jede Antwort im Stream
-                responses.append(response.answer)  # oder die entsprechende Methode, um den Antworttext zu erhalten
 
-            # Verbinden aller Antworten zu einem einzigen String
-            final_response = " ".join(responses)
-            print("PromptService client received: " + final_response)
-            return final_response
+
+from contextlib import contextmanager
+
+@contextmanager
+def grpc_channel():
+    channel = grpc.insecure_channel('langchain:50051')
+    try:
+        yield channel
+    finally:
+        channel.close()
+
+import anyio
+
+import threading
+import queue
+
+@app.get("/agent/{parameter}")
+async def call_agent_for(parameter: str):
+    '''Call the gRPC agent service with the given parameter and stream the response'''
+    try:
+        q = queue.Queue()
+
+        def grpc_thread():
+            with grpc.insecure_channel('langchain:50051') as channel:
+                stub = service_pb2_grpc.PromptServiceStub(channel)
+                stream = stub.GetResponseStream(service_pb2.PromptRequest(prompt=parameter))
+                for response in stream:
+                    q.put(response.answer + "")
+                q.put(None)  # Signal the end of the stream
+
+        threading.Thread(target=grpc_thread).start()
+
+        async def stream_generator():
+            while True:
+                result = q.get()
+                if result is None:
+                    break
+                yield result
+
+        return StreamingResponse(stream_generator(), media_type="text/plain")
     except httpx.RequestError as exc:
         print(f"Anfrage fehlgeschlagen: {exc}")
         return JSONResponse(status_code=500, content={"message": "gRPC-Service agent call_grpc_parameter ist nicht erreichbar"})

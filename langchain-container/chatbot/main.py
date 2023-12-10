@@ -14,8 +14,8 @@ class PromptService(service_pb2_grpc.PromptServiceServicer):
 
     def GetResponseStream(self, request, context):
         for chunk in agent_for(topic=request.prompt):
-            print(chunk)
-            yield service_pb2.PromptReply(answer='Agent: ' + chunk)
+            #print(chunk)
+            yield service_pb2.PromptReply(answer=chunk)
 
 
 def serve():

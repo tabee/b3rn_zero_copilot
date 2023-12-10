@@ -19,5 +19,5 @@ def agent_for(topic="Elefanten"):
     )
 
     for chunk in runnable.stream(topic):
-        print(chunk, end="", flush=True)
+        #print(chunk, end="", flush=True)
         yield chunk

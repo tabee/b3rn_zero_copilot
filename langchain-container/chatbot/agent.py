@@ -4,6 +4,7 @@ from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 
 def agent_for(topic="Elefanten"):
+    '''Agent, der eine Geschichte über ein Thema erzählt'''
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -20,8 +21,8 @@ def agent_for(topic="Elefanten"):
         {"topic": RunnablePassthrough()} | prompt | model | StrOutputParser()
     )
 
-    for chunk in runnable.stream(topic):
-        yield chunk
+    for chunks in runnable.stream(topic):
+        yield chunks
 
 if __name__ == "__main__":
     for chunk in agent_for(topic="Elefanten"):

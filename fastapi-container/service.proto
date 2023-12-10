@@ -4,6 +4,7 @@ package example;
 
 service PromptService {
   rpc GetResponse (PromptRequest) returns (PromptReply) {};
+  rpc GetResponseStream (PromptRequest) returns (stream PromptReply) {};
 }
 
 message PromptRequest {

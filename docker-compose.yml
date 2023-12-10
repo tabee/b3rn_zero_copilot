@@ -3,7 +3,6 @@ services:
   langchain:
     build: ./langchain-container
     ports:
-      #- "8000:8000" # FastAPI-Port
       - "50051:50051" # gRPC-Port
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -13,7 +12,7 @@ services:
   fastapi:
     build: ./fastapi-container
     ports:
-      - "80:80" 
+      - "80:80" # HTTP-Port
     networks:
       - mein-netzwerk
     depends_on:

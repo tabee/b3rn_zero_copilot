@@ -7,7 +7,23 @@ import service_pb2_grpc
 from fastapi import FastAPI
 from starlette.responses import StreamingResponse
 
-app = FastAPI()
+app = FastAPI(
+    title="b3rn-zero-copilot",
+    description="my sofa project",
+    summary="Deadpool's favorite app. Nuff said.",
+    version="0.0.1",
+    terms_of_service="http://example.com/terms/",
+    contact={
+        "name": "Mario Bee",
+        "url": "http://x-force.example.com/contact/",
+        "email": "bee.mario@gmail.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
 http_client = httpx.AsyncClient()
 
 @app.get("/")

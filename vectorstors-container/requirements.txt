@@ -1,0 +1,9 @@
+openai
+langchain
+faiss-cpu
+tiktoken
+grpcio
+grpcio-tools
+fastapi
+uvicorn
+httpx

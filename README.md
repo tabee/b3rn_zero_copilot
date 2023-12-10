@@ -22,11 +22,12 @@ Diese Anleitung hilft Ihnen dabei, die FastAPI/gRPC-Anwendung in einem Docker-Co
 ### Testen der FastAPI-Anwendung
 
 1. **Zugriff auf die Anwendung:**
+   - http://127.0.0.1/openapi.json
+   - http://127.0.0.1/docs#
    - Da der Port 80 des FastAPI-Containers auf den Port 8000 Ihres Host-Systems weitergeleitet wird, können Sie auf die Anwendung zugreifen, indem Sie den folgenden Befehl in Ihrem Terminal ausführen:
      ```
      curl http://0.0.0.0:80
-     curl http://0.0.0.0:80/call-grpc"
-     curl http://0.0.0.0:80/call-grpc/{topic}
+     curl http://0.0.0.0:80/agent/{topic}
      ```
    - Sie sollten eine Antwort wie `{"message":"Hello World"}` erhalten, was bedeutet, dass Ihre Anwendung erfolgreich läuft und auf Anfragen reagiert.
 

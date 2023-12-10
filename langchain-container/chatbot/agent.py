@@ -8,16 +8,15 @@ def agent_for(topic="Elefanten"):
         [
             (
                 "system",
-                "Erzähle etwas wissenswertes über {topic}:\n\n",
+                "Erzähl einen sehr lustigen Chuck Norris Witz über {topic}:\n\n",
             ),
             ("human", "{topic}"),
             ]
         )
-    model = ChatOpenAI(temperature=0.1)
+    model = ChatOpenAI(temperature=0.4, model="gpt-4")
     runnable = (
         {"topic": RunnablePassthrough()} | prompt | model | StrOutputParser()
     )
 
     for chunk in runnable.stream(topic):
-        #print(chunk, end="", flush=True)
         yield chunk

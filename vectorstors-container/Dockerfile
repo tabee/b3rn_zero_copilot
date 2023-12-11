@@ -16,3 +16,8 @@ COPY ./service.proto .
 # Generieren des gRPC-Codes
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. service.proto
 
+
+CMD ["python", "main.py"]
+
+
+

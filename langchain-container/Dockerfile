@@ -16,5 +16,5 @@ COPY ./service.proto .
 # Generieren des gRPC-Codes
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. service.proto
 
-# FastAPI-Server starten
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# gRPC-Server starten
+CMD ["python", "main.py"]

@@ -7,16 +7,16 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
-      - mein-netzwerk
+      - copilot-netzwerk
 
   fastapi:
     build: ./fastapi-container
     ports:
       - "80:80" # HTTP-Port
     networks:
-      - mein-netzwerk
+      - copilot-netzwerk
     depends_on:
       - langchain
 
 networks:
-  mein-netzwerk:
+  copilot-netzwerk:

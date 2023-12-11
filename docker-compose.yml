@@ -3,20 +3,27 @@ services:
   langchain:
     build: ./langchain-container
     ports:
-      - "50051:50051" # gRPC-Port
+      - "50051:50051" # gRPC-Port (1)
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - copilot-netzwerk
-
+  vectorstors:
+      build: ./vectorstors-container
+      ports:
+        - "50052:50052" # gRPC-Port (2)
+      environment:
+        - OPENAI_API_KEY=${OPENAI_API_KEY}
+      networks:
+        - copilot-netzwerk
   fastapi:
-    build: ./fastapi-container
-    ports:
-      - "80:80" # HTTP-Port
-    networks:
-      - copilot-netzwerk
-    depends_on:
-      - langchain
+      build: ./fastapi-container
+      ports:
+        - "80:80" # HTTP-Port
+      networks:
+        - copilot-netzwerk
+      depends_on:
+        - langchain
 
 networks:
   copilot-netzwerk:

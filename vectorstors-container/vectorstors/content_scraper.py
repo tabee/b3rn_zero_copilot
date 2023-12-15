@@ -1,5 +1,5 @@
+''' web scraper for faq '''
 import re
-import time
 import sqlite3
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -14,7 +14,6 @@ class WebContentScraper:
         self.sitemap_url = sitemap_url
         self.remove_patterns = remove_patterns
         self.timeout = timeout
-        print(f"Using database: {self.db_path}")
 
     def fetch_content(self, url):
         try:
@@ -94,11 +93,8 @@ class WebContentScraper:
         if not existing_entry:
             return True
 
-        # Überprüfen, ob lastmod_date ein String ist, bevor es geparst wird
         new_date = parser.parse(lastmod_date_sitemap) if isinstance(lastmod_date_sitemap, str) else lastmod_date_sitemap
-
         existing_date = existing_entry[0] if isinstance(existing_entry[0], datetime) else parser.parse(existing_entry[0])
-        #print(f"Comparing dates: {new_date} > {existing_date} from {url} resultat ist {new_date > existing_date}")
         return new_date > existing_date
 
     def save_or_update_data(self, data):
@@ -155,19 +151,15 @@ class WebContentScraper:
                 if data:
                     self.save_or_update_data(data)
 
-# def demo():
-#     start_time = time.time()  # Startzeit erfassen
+def demo():
+    ''' demo '''
+    scraper = WebContentScraper(
+        db_path='/workspaces/b3rn_zero_copilot/vectorstors-container/vectorstors/data/bsv_faq.db',
+        sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
+        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
+    )
+    scraper.scrape_and_store()
+    print("Scraping and storing process completed.")
 
-#     scraper = WebContentScraper(
-#         db_path='/workspaces/b3rn_zero_copilot/vectorstors-container/vectorstors/data/bsv_faq.db',
-#         sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
-#         remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
-#     )
-#     scraper.scrape_and_store()
-#     print("Scraping and storing process completed.")
-#     end_time = time.time()  # Endzeit erfassen
-#     duration = end_time - start_time
-#     print(f"Die Ausführungsdauer beträgt {duration} Sekunden.")
-
-# if __name__ == '__main__':
-#     demo()
+if __name__ == '__main__':
+    demo()

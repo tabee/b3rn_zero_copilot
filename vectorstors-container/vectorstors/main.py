@@ -5,12 +5,11 @@ data_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__
 print(f"Using data path: {data_path}")
 
 
-
 def ignite_faq__bsv_admin_ch():
     scraper = WebContentScraper(
         db_path= f'{data_path}/bsv_faq.db',
         sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
-        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
+        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n', 'Answer\n']
     )
     scraper.scrape_and_store()
 

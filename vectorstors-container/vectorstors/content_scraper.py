@@ -1,16 +1,15 @@
 ''' web scraper for faq '''
 import re
-import sqlite3
+from datetime import datetime
 import urllib.parse
 import xml.etree.ElementTree as ET
 from dateutil import parser
-from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
 class WebContentScraper:
-    def __init__(self, db_path, sitemap_url, remove_patterns, timeout=1):
-        self.db_path = db_path
+    def __init__(self, database, sitemap_url, remove_patterns, timeout=1):
+        self.database = database
         self.sitemap_url = sitemap_url
         self.remove_patterns = remove_patterns
         self.timeout = timeout
@@ -82,14 +81,8 @@ class WebContentScraper:
             return (language, category, question, answer, url, lastmod_date, lastmod_date)
         return None
 
-    def check_if_url_exists(self, url):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT updated_at FROM faq_data WHERE source = ?", (url,))
-            return cursor.fetchone()
-
     def should_update(self, url, lastmod_date_sitemap):
-        existing_entry = self.check_if_url_exists(url)
+        existing_entry = self.database.check_if_url_exists(url)
         if not existing_entry:
             return True
 
@@ -102,46 +95,14 @@ class WebContentScraper:
         lastmod_date = data[5] if isinstance(data[5], datetime) else parser.parse(data[5])
 
         if self.should_update(data[4], lastmod_date):
-            with sqlite3.connect(self.db_path) as conn:
-                try:
-                    cursor = conn.cursor()
-                    if self.check_if_url_exists(data[4]):
-                        cursor.execute("""
-                            UPDATE faq_data SET 
-                            language = ?, category = ?, question = ?, answer = ?, created_at = ?, updated_at = ?
-                            WHERE source = ?
-                        """, (data[0], data[1], data[2], data[3], data[5], data[6], data[4]))
-                    else:
-                        cursor.execute("""
-                            INSERT INTO faq_data (language, category, question, answer, source, created_at, updated_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?)
-                        """, data)
-                    conn.commit()
-                except sqlite3.DatabaseError as e:
-                    print(f"Error saving to database: {e}")
 
-    def create_table_if_not_exists(self):
-        with sqlite3.connect(self.db_path) as conn:
-            try:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS faq_data (
-                        id INTEGER PRIMARY KEY,
-                        language TEXT,
-                        category TEXT,
-                        question TEXT,
-                        answer TEXT,
-                        source TEXT,
-                        created_at TEXT,
-                        updated_at TEXT
-                    )
-                ''')
-                conn.commit()
-            except sqlite3.DatabaseError as e:
-                print(f"Error creating table: {e}")
+            if self.database.check_if_url_exists(data[4]):
+                self.database.update(data)
+            else:
+                self.database.insert(data)
 
     def scrape_and_store(self):
-        self.create_table_if_not_exists()
+        self.database.create_table_if_not_exists()
         urls_with_dates = self.get_sitemap_item()
         print(f"Found {len(urls_with_dates)} URLs in sitemap.")
         
@@ -150,16 +111,3 @@ class WebContentScraper:
                 data = self.process_url(url, lastmod_date)
                 if data:
                     self.save_or_update_data(data)
-
-def demo():
-    ''' demo '''
-    scraper = WebContentScraper(
-        db_path='/workspaces/b3rn_zero_copilot/vectorstors-container/vectorstors/data/bsv_faq.db',
-        sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
-        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
-    )
-    scraper.scrape_and_store()
-    print("Scraping and storing process completed.")
-
-if __name__ == '__main__':
-    demo()

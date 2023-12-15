@@ -16,7 +16,7 @@ Diese Anleitung hilft Ihnen dabei, die FastAPI/gRPC-Anwendung in einem Docker-Co
    - Navigieren Sie zum Hauptverzeichnis des Projekts, wo sich die `docker-compose.yml`-Datei befindet.
    - Führen Sie den folgenden Befehl aus, um die Docker-Container im Hintergrund zu starten:
      ```
-     docker-compose up -build
+     docker-compose up --build
      ```
 
 ### Testen der FastAPI-Anwendung

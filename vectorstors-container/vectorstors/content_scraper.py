@@ -14,6 +14,7 @@ class WebContentScraper:
         self.sitemap_url = sitemap_url
         self.remove_patterns = remove_patterns
         self.timeout = timeout
+        print(f"Using database: {self.db_path}")
 
     def fetch_content(self, url):
         try:
@@ -44,7 +45,7 @@ class WebContentScraper:
                       for tag in tags for element in soup.find_all(tag)]
         return '\n\n'.join(text_parts)
    
-    def get_sitemap_urls(self):
+    def get_sitemap_item(self):
         xml_content = self.fetch_content(self.sitemap_url)
         if not xml_content:
             return []
@@ -54,11 +55,11 @@ class WebContentScraper:
         urls_with_dates = []
         for url in root:
             loc = url.find("sitemap:loc", namespace)
-            lastmod_element = url.find("sitemap:lastmod", namespace)
+            lastmod_element_sitemap = url.find("sitemap:lastmod", namespace)
 
-            if loc is not None and lastmod_element is not None:
+            if loc is not None and lastmod_element_sitemap is not None:
                 loc_text = loc.text
-                lastmod_text = lastmod_element.text
+                lastmod_text = lastmod_element_sitemap.text
                 urls_with_dates.append((loc_text, lastmod_text))
             elif loc is not None:
                 loc_text = loc.text
@@ -85,19 +86,19 @@ class WebContentScraper:
     def check_if_url_exists(self, url):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT created_at FROM faq_data WHERE source = ?", (url,))
+            cursor.execute("SELECT updated_at FROM faq_data WHERE source = ?", (url,))
             return cursor.fetchone()
 
-    def should_update(self, url, lastmod_date):
+    def should_update(self, url, lastmod_date_sitemap):
         existing_entry = self.check_if_url_exists(url)
         if not existing_entry:
             return True
 
         # Überprüfen, ob lastmod_date ein String ist, bevor es geparst wird
-        new_date = parser.parse(lastmod_date) if isinstance(lastmod_date, str) else lastmod_date
+        new_date = parser.parse(lastmod_date_sitemap) if isinstance(lastmod_date_sitemap, str) else lastmod_date_sitemap
 
         existing_date = existing_entry[0] if isinstance(existing_entry[0], datetime) else parser.parse(existing_entry[0])
-
+        #print(f"Comparing dates: {new_date} > {existing_date} from {url} resultat ist {new_date > existing_date}")
         return new_date > existing_date
 
     def save_or_update_data(self, data):
@@ -145,7 +146,7 @@ class WebContentScraper:
 
     def scrape_and_store(self):
         self.create_table_if_not_exists()
-        urls_with_dates = self.get_sitemap_urls()
+        urls_with_dates = self.get_sitemap_item()
         print(f"Found {len(urls_with_dates)} URLs in sitemap.")
         
         for url, lastmod_date in urls_with_dates:
@@ -154,20 +155,19 @@ class WebContentScraper:
                 if data:
                     self.save_or_update_data(data)
 
+# def demo():
+#     start_time = time.time()  # Startzeit erfassen
 
-def main():
-    start_time = time.time()  # Startzeit erfassen
+#     scraper = WebContentScraper(
+#         db_path='/workspaces/b3rn_zero_copilot/vectorstors-container/vectorstors/data/bsv_faq.db',
+#         sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
+#         remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
+#     )
+#     scraper.scrape_and_store()
+#     print("Scraping and storing process completed.")
+#     end_time = time.time()  # Endzeit erfassen
+#     duration = end_time - start_time
+#     print(f"Die Ausführungsdauer beträgt {duration} Sekunden.")
 
-    scraper = WebContentScraper(
-        db_path='/workspaces/b3rn_zero_copilot/vectorstors-container/vectorstors/data/bsv_faq.db',
-        sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
-        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n','\n\n\n\n \n']
-    )
-    scraper.scrape_and_store()
-    print("Scraping and storing process completed.")
-    end_time = time.time()  # Endzeit erfassen
-    duration = end_time - start_time
-    print(f"Die Ausführungsdauer beträgt {duration} Sekunden.")
-
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     demo()

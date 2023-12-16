@@ -38,11 +38,16 @@ class WebContentScraper:
             text = re.sub(pattern, '', text)
         return text
 
-    def extract_text(self, soup, tags):
+    def extract_text_by_tag(self, soup, tags):
         text_parts = [self.clean_text(element.get_text()) 
                       for tag in tags for element in soup.find_all(tag)]
         return '\n\n'.join(text_parts)
    
+    def extract_text_by_id(self, soup, ids):
+        text_parts = [self.clean_text(soup.find(id=identifier).get_text())
+                    for identifier in ids if soup.find(id=identifier)]
+        return '\n\n'.join(text_parts)
+
     def get_sitemap_item(self):
         xml_content = self.fetch_content(self.sitemap_url)
         if not xml_content:
@@ -74,8 +79,8 @@ class WebContentScraper:
         soup = self.parse_html(html_content)
         language = self.extract_language(soup)
         category = self.extract_category(url)
-        question = self.extract_text(soup, ['h1'])
-        answer = self.extract_text(soup, ['article'])
+        question = self.extract_text_by_tag(soup, ['h1'])
+        answer = self.extract_text_by_tag(soup, ['article'])
 
         if question and language:
             return (language, category, question, answer, url, lastmod_date, lastmod_date)
@@ -111,3 +116,27 @@ class WebContentScraper:
                 data = self.process_url(url, lastmod_date)
                 if data:
                     self.save_or_update_data(data)
+
+
+class WebContentScraperEAK(WebContentScraper):
+    def __init__(self, database, sitemap_url, remove_patterns, timeout=1):
+        super().__init__(database, sitemap_url, remove_patterns, timeout)
+   
+    def extract_category(self, url, position=4):
+        return super().extract_category(url, position)
+    
+    def process_url(self, url, lastmod_date):
+        print(f"Processing URL: {url}")
+        html_content = self.fetch_content(url)
+        if not html_content:
+            return
+
+        soup = self.parse_html(html_content)
+        language = self.extract_language(soup)
+        category = self.extract_category(url)
+        question = self.extract_text_by_tag(soup, ['h1'])
+        answer = self.extract_text_by_id(soup, ['content'])
+
+        if question and language:
+            return (language, category, question, answer, url, lastmod_date, lastmod_date)
+        return None

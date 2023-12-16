@@ -1,5 +1,5 @@
 import os
-from content_scraper import WebContentScraper
+from content_scraper import WebContentScraper, WebContentScraperEAK
 from database import DatabaseHandler
 # import DatabaseHandler, WebContentScraper
 
@@ -19,26 +19,12 @@ def ignite_faq__bsv_admin_ch():
 
 
 
-
-
-class WebContentScraperEAK(WebContentScraper):
-    def __init__(self, database, sitemap_url, remove_patterns, timeout=1):
-        super().__init__(database, sitemap_url, remove_patterns, timeout)
-
-    def process_url(self, url, lastmod_date):
-        return super().process_url(url, lastmod_date)
-    
-    def extract_category(self, url, position=4):
-        return super().extract_category(url, position)
-    
-
-
 def ignite__eak_ch():
     database = DatabaseHandler(f'{data_path}/eak_faq.db')
     scraper = WebContentScraperEAK(
         database=database,
         sitemap_url='https://www.eak.admin.ch/eak/de/home.sitemap.xml',
-        remove_patterns=['Onlineshop\n', '\n']
+        remove_patterns=['Navigation','Zum Seitenanfang','Einkaufskorb', '\n']
     )
     scraper.scrape_and_store()
    

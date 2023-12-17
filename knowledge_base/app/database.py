@@ -75,6 +75,7 @@ class DatabaseHandler:
                     language = ?, category = ?, question = ?, answer = ?, created_at = ?, updated_at = ?
                     WHERE source = ?
                 """, (data[0], data[1], data[2], data[3], data[5], data[6], data[4]))
+                # (language[0], category[1], question[2], answer[3], url[4], lastmod_date[5], lastmod_date[6])
                 conn.commit()
             except sqlite3.DatabaseError as e:
                 print(f"Error update to database: {e}")           

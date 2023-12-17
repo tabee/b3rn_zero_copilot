@@ -1,4 +1,4 @@
-''' web scraper for faq '''
+''' content scraper module '''
 import re
 from datetime import datetime
 import urllib.parse

@@ -7,23 +7,23 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
-      - copilot-netzwerk
-  vectorstors:
-      build: ./vectorstors-container
+      - network
+  knowledge_base:
+      build: ./knowledge_base
       ports:
         - "50052:50052" # gRPC-Port (2)
       environment:
         - OPENAI_API_KEY=${OPENAI_API_KEY}
       networks:
-        - copilot-netzwerk
+        - network
   fastapi:
       build: ./fastapi-container
       ports:
         - "80:80" # HTTP-Port
       networks:
-        - copilot-netzwerk
+        - network
       depends_on:
         - langchain
 
 networks:
-  copilot-netzwerk:
+  network:

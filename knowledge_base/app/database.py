@@ -1,15 +1,13 @@
 import os
 import sqlite3
 
-data_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data'))
-DB_PATH = data_path + '/bsv_faq.db'
-print(f"Using data path: {DB_PATH}")
-
 class DatabaseHandler:
     def __init__(self, db_path, timeout=1):
         self.db_path = db_path
         self.timeout = timeout
         self.create_table_if_not_exists()
+        print("\n\n********** DatabaseHandler **********")
+        print(f"path: {self.db_path}")
         
     def get_connection(self):
         """Herstellt eine Verbindung zur SQLite-Datenbank."""
@@ -93,9 +91,10 @@ class DatabaseHandler:
                 print(f"Error insert to database: {e}")       
 
 if __name__ == '__main__':
+    DB_PATH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
     db = DatabaseHandler(DB_PATH)
     res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
-    print(f"Result: {len(res)} rows")
+    print(f"\nResult: {len(res)} rows")
     for r in res:
         print(r)
 

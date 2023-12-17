@@ -1,5 +1,6 @@
 ''' content scraper module '''
 import re
+import html2text
 from datetime import datetime
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -34,6 +35,7 @@ class WebContentScraper:
         return path_segments[position - 1] if len(path_segments) >= position else None
 
     def clean_text(self, text):
+        ''' Remove all patterns from the text'''
         for pattern in self.remove_patterns:
             text = re.sub(pattern, '', text)
         return text
@@ -46,6 +48,21 @@ class WebContentScraper:
     def extract_text_by_id(self, soup, ids):
         text_parts = [self.clean_text(soup.find(id=identifier).get_text())
                     for identifier in ids if soup.find(id=identifier)]
+        return '\n\n'.join(text_parts)
+
+    def extract_html2text_by_id(self, soup, ids):
+        converter = html2text.HTML2Text()
+        converter.ignore_links = False
+        remove_pattern = r'\[.*?\]\(javascript:[^\)]*\)' # Regex-Muster, um JavaScript-Links zu identifizieren
+
+        text_parts = []
+        for identifier in ids:
+            element = soup.find(id=identifier)
+            if element:
+                html_content = self.clean_text(str(element))
+                markdown_content = converter.handle(html_content)
+                cleaned_markdown_content = re.sub(remove_pattern, '', markdown_content)
+                text_parts.append(cleaned_markdown_content)
         return '\n\n'.join(text_parts)
 
     def get_sitemap_item(self):
@@ -75,25 +92,33 @@ class WebContentScraper:
         html_content = self.fetch_content(url)
         if not html_content:
             return
-
         soup = self.parse_html(html_content)
+        
         language = self.extract_language(soup)
         category = self.extract_category(url)
         question = self.extract_text_by_tag(soup, ['h1'])
         answer = self.extract_text_by_tag(soup, ['article'])
+        lastmod_date_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         if question and language:
-            return (language, category, question, answer, url, lastmod_date)
+            return (language, category, question, answer, url, lastmod_date, lastmod_date_update)
         return None
 
     def should_update(self, url, lastmod_date_sitemap):
         existing_entry = self.database.check_if_url_exists(url)
         if not existing_entry:
+            print("*** New entriy ***")
+            print(f"URL: {url} does not exist in database.")
+            print("Processing")
             return True
 
-        new_date = parser.parse(lastmod_date_sitemap) if isinstance(lastmod_date_sitemap, str) else lastmod_date_sitemap
+        # mess with diverging date formats from the sitemap(s)
+        sitemap_date = parser.parse(lastmod_date_sitemap) if isinstance(lastmod_date_sitemap, str) else lastmod_date_sitemap
+        sitemap_date = sitemap_date.strftime("%Y-%m-%d %H:%M:%S")
+        sitemap_date_timestamp = datetime.fromisoformat(sitemap_date)
         existing_date = existing_entry[0] if isinstance(existing_entry[0], datetime) else parser.parse(existing_entry[0])
-        return new_date > existing_date
+        print(f"*** Comparing dates > should update: {sitemap_date_timestamp > existing_date} ***")
+        return sitemap_date_timestamp > existing_date
 
     def save_or_update_data(self, data):
         # Überprüfen, ob data[5] bereits ein datetime-Objekt ist
@@ -112,11 +137,13 @@ class WebContentScraper:
         print(f"Found {len(urls_with_dates)} URLs in sitemap.")
         
         for url, lastmod_date in urls_with_dates:
-            if self.should_update(url, lastmod_date):
-                data = self.process_url(url, lastmod_date)
+            if lastmod_date is None:
+                lastmod_date = datetime.now()
+            lastmod_date_parsed = lastmod_date if isinstance(lastmod_date, datetime) else parser.parse(lastmod_date)
+            if self.should_update(url, lastmod_date_parsed):
+                data = self.process_url(url, lastmod_date_parsed)
                 if data:
                     self.save_or_update_data(data)
-
 
 class WebContentScraperEAK(WebContentScraper):
     def __init__(self, database, sitemap_url, remove_patterns, timeout=1):
@@ -126,17 +153,28 @@ class WebContentScraperEAK(WebContentScraper):
         return super().extract_category(url, position)
     
     def process_url(self, url, lastmod_date):
-        print(f"Processing URL: {url}")
-        html_content = self.fetch_content(url)
-        if not html_content:
-            return
+        result = super().process_url(url, lastmod_date)     
+        if result:
+            language, category, question, answer, url, lastmod_date, lastmod_date_update = result
 
-        soup = self.parse_html(html_content)
-        language = self.extract_language(soup)
-        category = self.extract_category(url)
-        question = self.extract_text_by_tag(soup, ['h1'])
-        answer = self.extract_text_by_id(soup, ['content'])
-
-        if question and language:
-            return (language, category, question, answer, url, lastmod_date)
+            html_content = self.fetch_content(url)
+            if not html_content:
+                return
+            soup = self.parse_html(html_content)
+            
+            question = self.extract_text_by_tag(soup, ['h1'])
+            answer = self.extract_html2text_by_id(soup, ['content'])
+            
+            if question and language:
+                return (language, category, question, answer, url, lastmod_date, lastmod_date_update)
         return None
+  
+if __name__ == '__main__':
+    from database import DatabaseHandler
+    database = DatabaseHandler(f'/workspaces/b3rn_zero_copilot/knowledge_base/app/data/eak_website.db')
+    scraper = WebContentScraperEAK(
+        database=database,
+        sitemap_url='https://www.eak.admin.ch/eak/de/home.sitemap.xml',
+        remove_patterns=['Navigation', 'Einkaufskorb',]
+    )
+    scraper.scrape_and_store()

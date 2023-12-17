@@ -29,5 +29,5 @@ def ignite__eak_ch():
     scraper.scrape_and_store()
    
 if __name__ == '__main__':
-    #ignite_faq__bsv_admin_ch()
+    ignite_faq__bsv_admin_ch()
     ignite__eak_ch()

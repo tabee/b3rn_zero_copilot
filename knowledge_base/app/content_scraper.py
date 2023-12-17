@@ -83,7 +83,7 @@ class WebContentScraper:
         answer = self.extract_text_by_tag(soup, ['article'])
 
         if question and language:
-            return (language, category, question, answer, url, lastmod_date, lastmod_date)
+            return (language, category, question, answer, url, lastmod_date)
         return None
 
     def should_update(self, url, lastmod_date_sitemap):
@@ -138,5 +138,5 @@ class WebContentScraperEAK(WebContentScraper):
         answer = self.extract_text_by_id(soup, ['content'])
 
         if question and language:
-            return (language, category, question, answer, url, lastmod_date, lastmod_date)
+            return (language, category, question, answer, url, lastmod_date)
         return None

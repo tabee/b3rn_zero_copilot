@@ -59,10 +59,11 @@ class WebContentScraper:
         for identifier in ids:
             element = soup.find(id=identifier)
             if element:
-                html_content = self.clean_text(str(element))
+                html_content = str(element)
+                html_content = re.sub(remove_pattern, '', html_content)
+                html_content = self.clean_text(html_content)
                 markdown_content = converter.handle(html_content)
-                cleaned_markdown_content = re.sub(remove_pattern, '', markdown_content)
-                text_parts.append(cleaned_markdown_content)
+                text_parts.append(markdown_content)
         return '\n\n'.join(text_parts)
 
     def get_sitemap_item(self):
@@ -175,6 +176,9 @@ if __name__ == '__main__':
     scraper = WebContentScraperEAK(
         database=database,
         sitemap_url='https://www.eak.admin.ch/eak/de/home.sitemap.xml',
-        remove_patterns=['Navigation', 'Einkaufskorb',]
+        remove_patterns = [
+            'Navigation', 
+            'Einkaufskorb',
+        ]
     )
     scraper.scrape_and_store()

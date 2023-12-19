@@ -35,8 +35,49 @@ class DatabaseHandler:
             except sqlite3.DatabaseError as e:
                 print(f"Error creating table: {e}")
 
-    def get_suggestions_questions(self, input_text, languages="de", categories=None):
+
+    def get_unique_languages(self):
+        """Ruft einzigartige Sprachen aus der Datenbank ab."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT DISTINCT language FROM faq_data")
+            # Extrahiert die Sprachen aus den Ergebniszeilen
+            languages = [row[0] for row in cursor.fetchall()]
+            return languages if languages else None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def get_unique_categories(self, selected_languages=None):
+        """Ruft einzigartige Kategorien für die gegebenen Sprachen ab."""
+
+        if selected_languages is None:
+            selected_languages = self.get_unique_languages()
+
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            if selected_languages:
+                placeholders = ','.join('?' * len(selected_languages))
+                query = f"SELECT DISTINCT category FROM faq_data WHERE language IN ({placeholders})"
+                cursor.execute(query, selected_languages)
+            else:
+                cursor.execute("SELECT DISTINCT category FROM faq_data")
+            return [row[0] for row in cursor.fetchall()]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def get_suggestions_questions(self, input_text, languages=None, categories=None):
         """Erhält Vorschläge basierend auf Eingabetext, Sprache und Kategoriefiltern."""
+
+        if languages is None:
+            languages = self.get_unique_languages()
+
+        if categories is None:
+            categories = self.get_unique_categories(selected_languages=languages)
+
         conn = self.get_connection()
         cursor = conn.cursor()
         try:
@@ -93,7 +134,13 @@ class DatabaseHandler:
 if __name__ == '__main__':
     DB_PATH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
     db = DatabaseHandler(DB_PATH)
-    res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
+
+
+    print(db.get_unique_categories(["de"]))
+
+
+    #res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
+    res = db.get_suggestions_questions("Wie erhalte ich")
     print(f"\nResult: {len(res)} rows")
     for r in res:
         print(r)

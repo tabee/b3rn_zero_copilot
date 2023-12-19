@@ -62,14 +62,6 @@ def serve():
 serve()
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     import os
     # install or update the databases

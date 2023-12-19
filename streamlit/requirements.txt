@@ -1,0 +1,14 @@
+openai
+langchain
+faiss-cpu
+tiktoken
+grpcio
+grpcio-tools
+fastapi
+uvicorn
+httpx
+bs4
+python-dateutil
+html2text
+streamlit
+streamlit-searchbox

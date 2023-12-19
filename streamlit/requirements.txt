@@ -12,3 +12,4 @@ python-dateutil
 html2text
 streamlit
 streamlit-searchbox
+streamlit-autorefresh

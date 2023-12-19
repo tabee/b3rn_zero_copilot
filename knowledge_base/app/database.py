@@ -162,9 +162,9 @@ if __name__ == '__main__':
     DB_PATH__BSV_ADMIN_CH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
     db = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
     
-    faq = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
-    for q,a in faq[0:2]:
-        print(f"Frage: {q}\nAntwort: {a}\n")
+    # faq = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
+    # for q,a in faq[0:2]:
+    #     print(f"Frage: {q}\nAntwort: {a}\n")
 
     # print("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?")
     # print(db.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
@@ -172,10 +172,10 @@ if __name__ == '__main__':
     #print(db.get_unique_categories(["de"]))
 
 
-    #res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
-    # res = db.get_suggestions_questions("Wie erhalte ich")
-    # print(f"\nResult: {len(res)} rows")
-    # for r in res:
-    #     print(r)
+    res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
+    res = db.get_suggestions_questions("Wie erhalte ich")
+    print(f"\nResult: {len(res)} rows")
+    for r in res:
+        print(r)
 
     #print(f"Check if url exists: {db.check_if_url_exists('https://faq.bsv.admin.ch/fr/assurance-vieillesse-et-survivants-avs/les-refugies-en-provenance-dukraine-doivent-ils-payer-des')}")

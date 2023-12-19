@@ -58,12 +58,15 @@ async def call_agent_for(parameter: str):
 
     return StreamingResponse(stream_generator(), media_type="text/plain")
 
-@app.get("/suggest/{topic}")
-def call_database_for_suggestions(
-    topic: str = Path(..., description="Das Thema, für das Vorschläge abgerufen werden sollen.")
+@app.get("/sqlite/suggest/{topic}")
+def call_sqlite_database_for_suggestions(
+    topic: str = Path(..., description="Das Thema, für das Fragen-Vorschläge abgerufen werden sollen.")
 ):
     """
-    Ruft eine Liste von Vorschlägen basierend auf dem angegebenen Thema ab.
+    Ruft eine Liste von Frage-Vorschlägen basierend auf dem angegebenen Thema ab.
+
+    Vorteil: schnell, sucht die Fragen in einer SQLite-Datenbank.
+    Nachteil: Unterstützt nur eine exakte Suche.
 
     Dieser Endpoint kommuniziert mit einem gRPC-basierten Microservice, um relevante 
     Fragen und Antworten zu einem bestimmten Thema zu erhalten.
@@ -82,5 +85,59 @@ def call_database_for_suggestions(
             categories=None))
         # Extrahiert die Liste von Vorschlägen als reine Python-Liste
         suggestions = [suggestion for suggestion in response.suggestions]
-        print("Client received: ", suggestions)
+        print("sqlite received: ", suggestions)
         return suggestions
+
+@app.get("/vectorstore/suggest/{topic}")
+def call_vectorstore_for_suggestions(
+    topic: str = Path(..., description="Text, für den Frage-Vorschläge abgerufen werden sollen.")
+):
+    """
+    Ruft eine Vectorstore von Frage-Vorschlägen basierend auf dem angegebenen Thema ab.
+
+    Vorteil: Vektorbasierte Suche, die auch ähnliche Fragen findet.
+    Nachteil: langsam
+
+    Dieser Endpoint kommuniziert mit einem gRPC-basierten Microservice, um relevante 
+    Fragen und Antworten zu einem bestimmten Thema zu erhalten.
+
+    Args:
+        topic (str): Das Thema, für das Vorschläge abgerufen werden sollen.
+
+    Returns:
+        SuggestionResponse: Eine Liste von Vorschlägen als Strings.
+    """
+    with grpc.insecure_channel('knowledge_base:50052') as channel:
+        stub = service_pb2_grpc.DatabaseHandlerServiceStub(channel)
+        response = stub.GetSuggestionsVector(service_pb2.GetSuggestionsRequest(
+            topic=topic,
+            languages=None,
+            categories=None))
+        # Extrahiert die Liste von Vorschlägen als reine Python-Liste
+        suggestions = [suggestion for suggestion in response.suggestions]
+        print("vectorstore received: ", suggestions)
+        return suggestions
+
+@app.get("/suggest/{topic}")
+def suggest(topic: str = Path(..., description="Das Thema, für das Vorschläge abgerufen werden sollen.")):
+    """
+    Ruft zuerst Vorschläge über die SQLite-Datenbank ab. Falls keine Vorschläge gefunden werden,
+    wird der Vectorstore-Endpunkt abgefragt.
+
+    Args:
+        topic (str): Das Thema, für das Vorschläge abgerufen werden sollen.
+
+    Returns:
+        List[str]: Eine Liste von Vorschlägen als Strings.
+    """
+
+    # Zuerst SQLite-Datenbank-Endpunkt abfragen
+    sqlite_suggestions = call_sqlite_database_for_suggestions(topic)
+
+    # Überprüfen, ob Vorschläge von SQLite-Datenbank vorhanden sind
+    if sqlite_suggestions:
+        # Wenn ja, diese zurückgeben
+        return sqlite_suggestions
+
+    # Falls keine Vorschläge von SQLite-Datenbank, Vectorstore-Endpunkt abfragen
+    return call_vectorstore_for_suggestions(topic)

@@ -13,29 +13,70 @@ DB_PATH__BSV_ADMIN_CH_VECTORESTORE = DB_PATH + '/bsv_faq_demo_vectorestore'
 
 
 def init():
-    db = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
+    db_sqlite = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
 
-    bsv_faq_demo = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
     embeddings = OpenAIEmbeddings()
-
     list_of_documents = []
-    for q,a in bsv_faq_demo:
-        content = f"question: {q}\n answer: {a}\n\n"
-        print(f"add: {content}...")
-        list_of_documents.append(Document(page_content=content, metadata=dict(category="alters-und-hinterlassenenversicherung-ahv")))
-    
+    categories = db_sqlite.get_unique_categories()
+
+    for category in categories:
+        bsv_faq_by_category = db_sqlite.get_questions_answers_by_category(category)
+        
+        for q,a in bsv_faq_by_category:
+            content = f"question: {q}\n answer: {a}\n\n"
+            list_of_documents.append(
+                Document( page_content=content, metadata=dict(category=category, type="question-answer") )
+                )
+            list_of_documents.append(
+                Document( page_content=q, metadata=dict(category=category, type="question") )
+                )
+            list_of_documents.append(
+                Document( page_content=a, metadata=dict(category=category, type="answer") )
+                )
+        
     faiss_db = FAISS.from_documents(list_of_documents, embeddings)
     faiss_db.save_local(DB_PATH__BSV_ADMIN_CH_VECTORESTORE)
 
-
-
-async def test(query):
+def get_suggestions_questions(input_text, languages=None, categories=None, k=5):
+    '''Get suggestions based on input text. '''
     embeddings = OpenAIEmbeddings()
     faiss_db = FAISS.load_local(DB_PATH__BSV_ADMIN_CH_VECTORESTORE, embeddings)
-    results_with_scores_filtered = await faiss_db.asimilarity_search_with_score(query, k=1, fetch_k=10)
-    for doc, score in results_with_scores_filtered:
-        print(f"Content: {doc.page_content}, Metadata: {doc.metadata}, Score: {score}")
 
+    categories = None
+    if categories is None:
+        results_with_scores_filtered = faiss_db.similarity_search(
+            input_text, 
+            k=k, 
+            filter={'type': 'question'},
+            fetch_k=10)
+        list_of_questions = [result.page_content for result in results_with_scores_filtered]
+        return list_of_questions
+    else:
+        # @todo: implement category filter
+        return None
+    
+async def aget_suggestions_questions(input_text, languages=None, categories=None, k=5):
+    '''Get suggestions based on input text. '''
+    embeddings = OpenAIEmbeddings()
+    faiss_db = FAISS.load_local(DB_PATH__BSV_ADMIN_CH_VECTORESTORE, embeddings)
+
+    categories = None
+    if categories is None:
+        results_with_scores_filtered = await faiss_db.asimilarity_search(
+            input_text, 
+            k=k, 
+            filter={'type': 'question'},
+            fetch_k=10)
+        list_of_questions = [result.page_content for result in results_with_scores_filtered]
+        return list_of_questions
+    else:
+        # @todo: implement category filter
+        return None
+    
 if __name__ == '__main__':
-    init()
-    asyncio.run(test("Lohnabrechnungen"))
+    #init()
+    #res = asyncio.run(aget_suggestions_questions("KJFG", k=5))
+    res = get_suggestions_questions("KJFG", k=5)
+    print(len(res))
+    for r in res:
+        print(r)

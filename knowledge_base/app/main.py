@@ -6,6 +6,7 @@ import service_pb2
 import service_pb2_grpc
 from content_scraper import WebContentScraper, WebContentScraperEAK
 from database import DatabaseHandler
+from vectorstore import get_suggestions_questions as get_suggestions_questions_vectorstore
 
 data_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data'))
 db__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
@@ -51,6 +52,11 @@ class DatabaseHandlerService(service_pb2_grpc.DatabaseHandlerServiceServicer):
         suggestions = db__bsv_admin_ch.get_suggestions_questions(
             request.topic, request.languages, request.categories)
         return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
+    def GetSuggestionsVector(self, request, context):
+        # Hier die Logik zur Abfrage der Vektor-Datenbank
+        suggestions = get_suggestions_questions_vectorstore(
+            request.topic, request.languages, request.categories)
+        return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -60,5 +66,5 @@ def serve():
     server.wait_for_termination()
 
 if __name__ == '__main__':
-    init_databases(data_path)
+    #init_databases(data_path)
     serve()

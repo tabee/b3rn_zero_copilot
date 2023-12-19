@@ -11,16 +11,16 @@ from streamlit_searchbox import st_searchbox
 
 def search_function(topic):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
-    #time.sleep(2)
+    
 
     if topic:
-        response = requests.get(f'http://127.0.0.1:80/suggest/{topic}')
+        response = requests.get(f'http://fastapi:80/suggest/{topic}')
         if response.status_code == 200:
             suggestions = response.json()
             for suggestion in suggestions:
                 st.write(suggestion)
         else:
-            st.write("Fehler bei der Anfrage an die API")
+            time.sleep(2)
 
         return suggestions
 
@@ -42,20 +42,20 @@ if selected_value:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # # React to user input
-    # if prompt := st.chat_input("Enter your message"):
-    #     # Display user message in chat message container
-    #     with st.chat_message("user"):
-    #         st.markdown(prompt)
-    #     # Add user message to chat history
-    #     st.session_state.messages.append({"role": "user", "content": prompt})
+    # React to user input
+    if prompt := st.chat_input("Enter your message"):
+        # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
        
-    #     respomse_output = "some response"
-    #     # Display assistant response in chat message container
-    #     with st.chat_message("assistant"):
-    #         st.markdown(respomse_output)
-    #     # Add assistant response to chat history
-    #     st.session_state.messages.append({"role": "assistant", "content": respomse_output})
+        respomse_output = "some response"
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            st.markdown(respomse_output)
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": respomse_output})
 
 
 

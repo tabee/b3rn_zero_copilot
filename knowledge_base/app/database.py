@@ -7,7 +7,7 @@ class DatabaseHandler:
         self.timeout = timeout
         self.create_table_if_not_exists()
         print("\n\n********** DatabaseHandler **********")
-        print(f"path: {self.db_path}")
+        print(f"path: {self.db_path}\n")
         
     def get_connection(self):
         """Herstellt eine Verbindung zur SQLite-Datenbank."""
@@ -15,6 +15,7 @@ class DatabaseHandler:
         return conn
 
     def create_table_if_not_exists(self):
+        '''Create table if not exists'''
         with self.get_connection() as conn:
             try:
                 cursor = conn.cursor()
@@ -34,7 +35,6 @@ class DatabaseHandler:
                 print("Table created successfully")
             except sqlite3.DatabaseError as e:
                 print(f"Error creating table: {e}")
-
 
     def get_unique_languages(self):
         """Ruft einzigartige Sprachen aus der Datenbank ab."""
@@ -99,13 +99,39 @@ class DatabaseHandler:
             cursor.close()
             conn.close()
 
+    def get_answer(self, question):
+        """Ruft die Antwort für die ausgewählte Frage aus der Datenbank ab."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT answer FROM faq_data WHERE question = ?", (question,))
+            result = cursor.fetchone()
+            return result[0] if result else "No answer found."
+        finally:
+            cursor.close()
+            conn.close()
+
+    def get_questions_answers_by_category(self, category):
+        """Ruft alle Fragen und Antworten für eine spezifische Kategorie ab."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            query = "SELECT question, answer FROM faq_data WHERE category = ?"
+            cursor.execute(query, (category,))
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+            conn.close()
+
     def check_if_url_exists(self, url):
+        '''Check if url exists in database and returns lastmod_date if exists'''
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT updated_at FROM faq_data WHERE source = ?", (url,))
             return cursor.fetchone()
 
     def update(self, data):
+        '''Update data in database'''
         with self.get_connection() as conn:
             try:
                 cursor = conn.cursor()
@@ -120,6 +146,7 @@ class DatabaseHandler:
                 print(f"Error update to database: {e}")           
 
     def insert(self, data):
+        '''Insert data to database'''
         with self.get_connection() as conn:
             try:
                 cursor = conn.cursor()
@@ -132,17 +159,23 @@ class DatabaseHandler:
                 print(f"Error insert to database: {e}")       
 
 if __name__ == '__main__':
-    DB_PATH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
-    db = DatabaseHandler(DB_PATH)
+    DB_PATH__BSV_ADMIN_CH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
+    db = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
+    
+    faq = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
+    for q,a in faq[0:2]:
+        print(f"Frage: {q}\nAntwort: {a}\n")
 
-
-    print(db.get_unique_categories(["de"]))
+    # print("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?")
+    # print(db.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
+    
+    #print(db.get_unique_categories(["de"]))
 
 
     #res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
-    res = db.get_suggestions_questions("Wie erhalte ich")
-    print(f"\nResult: {len(res)} rows")
-    for r in res:
-        print(r)
+    # res = db.get_suggestions_questions("Wie erhalte ich")
+    # print(f"\nResult: {len(res)} rows")
+    # for r in res:
+    #     print(r)
 
-    print(f"Check if url exists: {db.check_if_url_exists('https://faq.bsv.admin.ch/fr/assurance-vieillesse-et-survivants-avs/les-refugies-en-provenance-dukraine-doivent-ils-payer-des')}")
+    #print(f"Check if url exists: {db.check_if_url_exists('https://faq.bsv.admin.ch/fr/assurance-vieillesse-et-survivants-avs/les-refugies-en-provenance-dukraine-doivent-ils-payer-des')}")

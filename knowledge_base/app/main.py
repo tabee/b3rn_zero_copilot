@@ -1,4 +1,4 @@
-
+''' gRPC server for the knowledge base service '''''
 from concurrent import futures
 import grpc
 import os
@@ -59,29 +59,6 @@ def serve():
     server.start()
     server.wait_for_termination()
 
-serve()
-
-
 if __name__ == '__main__':
-    import os
-    # install or update the databases
-    # init_databases(data_path)
-
-    # databasehandler for BSV-FAQ, EAK-Website
-    db__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
-    db__eak_admin_ch = DatabaseHandler(f'{data_path}/eak_website.db')
-
-
-    # test suggestions by search query
-    suggestions = db__bsv_admin_ch.get_suggestions_questions(
-        "Taggelder",
-        ["de"],
-        ["erwerbsersatz-eo"])
-    # print results
-    print(suggestions)
-    ''' retunrs:
-    ['Auf wie viele Taggelder habe ich Anspruch, wenn ich Teilzeit arbeite?', 'Auf wie viele Taggelder habe ich Anspruch, wenn ich Vollzeit arbeite?', 'Auf wie viele Taggelder habe ich Anspruch?']
-    '''
-    # test if url exists
-    URL_TO_CHECK = 'https://www.eak.admin.ch/eak/de/home/EAK/publikationen/mitteilungs-archiv/neuerungen-per-2024.html'
-    print(f"\nCheck if url exists: {db__eak_admin_ch.check_if_url_exists(URL_TO_CHECK)}")
+    init_databases(data_path)
+    serve()

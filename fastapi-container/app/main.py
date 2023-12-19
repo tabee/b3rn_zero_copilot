@@ -78,8 +78,8 @@ def call_database_for_suggestions(
         stub = service_pb2_grpc.DatabaseHandlerServiceStub(channel)
         response = stub.GetSuggestions(service_pb2.GetSuggestionsRequest(
             topic=topic,
-            languages=["de"],
-            categories=["erwerbsersatz-eo"]))
+            languages=None,
+            categories=None))
         # Extrahiert die Liste von Vorschlägen als reine Python-Liste
         suggestions = [suggestion for suggestion in response.suggestions]
         print("Client received: ", suggestions)

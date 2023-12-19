@@ -57,3 +57,15 @@ async def call_agent_for(parameter: str):
             yield result + "\n"  # Send the complete sentence or paragraph
 
     return StreamingResponse(stream_generator(), media_type="text/plain")
+
+@app.get("/suggest/{topic}")
+def call_database_for_suggestions(topic: str):
+    '''get suggestions'''
+    with grpc.insecure_channel('knowledge_base:50052') as channel:
+        stub = service_pb2_grpc.DatabaseHandlerServiceStub(channel)
+        response = stub.GetSuggestions(service_pb2.GetSuggestionsRequest(
+            topic=topic,
+            languages=["de"],
+            categories=["erwerbsersatz-eo"]))
+        print("Client received: " + str(response.suggestions))
+        return str(response.suggestions)

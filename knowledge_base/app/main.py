@@ -1,26 +1,29 @@
+
+from concurrent import futures
+import grpc
 import os
+import service_pb2
+import service_pb2_grpc
 from content_scraper import WebContentScraper, WebContentScraperEAK
 from database import DatabaseHandler
 
 data_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data'))
-DB_PATH = data_path + '/bsv_faq.db'
-print(f"Using data path: {DB_PATH}")
+db__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
 
-
-def ignite_faq__bsv_admin_ch():
-    database = DatabaseHandler(f'{data_path}/bsv_faq.db')
-    scraper = WebContentScraper(
-        database=database,
+def init_databases(data_path):
+    ''' run scrapers for the EAK & BSV-FAQ website in german, french and italian '''
+    # BSV-FAQ
+    database__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
+    scraper__bsv_admin_ch = WebContentScraper(
+        database=database__bsv_admin_ch,
         sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
         remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n', 'Answer\n', '\n']
     )
-    scraper.scrape_and_store()
-
-def ignite__eak_ch():
-    ''' Ignite the scraper for the EAK website in german, french and italian '''
-    database = DatabaseHandler(f'{data_path}/eak_website.db')
+    scraper__bsv_admin_ch.scrape_and_store()
+    # EAK-Website
+    database__eak_admin_ch = DatabaseHandler(f'{data_path}/eak_website.db')
     scraper_de = WebContentScraperEAK(
-        database=database,
+        database=database__eak_admin_ch,
         sitemap_url='https://www.eak.admin.ch/eak/de/home.sitemap.xml',
         remove_patterns=[            
             'Navigation', 
@@ -29,18 +32,64 @@ def ignite__eak_ch():
             'Zum Seitenanfang',])
     scraper_de.scrape_and_store()
     scraper_fr = WebContentScraperEAK(
-        database=database,
+        database=database__eak_admin_ch,
         sitemap_url='https://www.eak.admin.ch/eak/fr/home.sitemap.xml',
         remove_patterns=["Début de la page","Panier d'achat",'\n']
     )
     scraper_fr.scrape_and_store()
     scraper_it = WebContentScraperEAK(
-        database=database,
+        database=database__eak_admin_ch,
         sitemap_url='https://www.eak.admin.ch/eak/it/home.sitemap.xml',
         remove_patterns=["Navigazione","Inizio pagina", "Carrello acquistiCarrello acquisti", "\n"]
     )
     scraper_it.scrape_and_store()
 
+# gRPC server
+class DatabaseHandlerService(service_pb2_grpc.DatabaseHandlerServiceServicer):
+    def GetSuggestions(self, request, context):
+        # Hier die Logik zur Abfrage der Datenbank
+        suggestions = db__bsv_admin_ch.get_suggestions_questions(
+            request.topic, request.languages, request.categories)
+        return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    service_pb2_grpc.add_DatabaseHandlerServiceServicer_to_server(DatabaseHandlerService(), server)
+    server.add_insecure_port('[::]:50052')
+    server.start()
+    server.wait_for_termination()
+
+serve()
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-    ignite_faq__bsv_admin_ch()
-    ignite__eak_ch()
+    import os
+    # install or update the databases
+    # init_databases(data_path)
+
+    # databasehandler for BSV-FAQ, EAK-Website
+    db__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
+    db__eak_admin_ch = DatabaseHandler(f'{data_path}/eak_website.db')
+
+
+    # test suggestions by search query
+    suggestions = db__bsv_admin_ch.get_suggestions_questions(
+        "Taggelder",
+        ["de"],
+        ["erwerbsersatz-eo"])
+    # print results
+    print(suggestions)
+    ''' retunrs:
+    ['Auf wie viele Taggelder habe ich Anspruch, wenn ich Teilzeit arbeite?', 'Auf wie viele Taggelder habe ich Anspruch, wenn ich Vollzeit arbeite?', 'Auf wie viele Taggelder habe ich Anspruch?']
+    '''
+    # test if url exists
+    URL_TO_CHECK = 'https://www.eak.admin.ch/eak/de/home/EAK/publikationen/mitteilungs-archiv/neuerungen-per-2024.html'
+    print(f"\nCheck if url exists: {db__eak_admin_ch.check_if_url_exists(URL_TO_CHECK)}")

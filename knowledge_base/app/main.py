@@ -22,8 +22,11 @@ def ignite__eak_ch():
     scraper_de = WebContentScraperEAK(
         database=database,
         sitemap_url='https://www.eak.admin.ch/eak/de/home.sitemap.xml',
-        remove_patterns=["Navigation", "Zum Seitenanfang","Einkaufskorb", "\n"]
-    )
+        remove_patterns=[            
+            'Navigation', 
+            'Einkaufskorb',
+            'Seite drucken',
+            'Zum Seitenanfang',])
     scraper_de.scrape_and_store()
     scraper_fr = WebContentScraperEAK(
         database=database,

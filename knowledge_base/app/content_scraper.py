@@ -52,15 +52,16 @@ class WebContentScraper:
 
     def extract_html2text_by_id(self, soup, ids):
         converter = html2text.HTML2Text()
-        converter.ignore_links = False
-        remove_pattern = r'\[.*?\]\(javascript:[^\)]*\)' # Regex-Muster, um JavaScript-Links zu identifizieren
-
+        converter.ignore_links = True
+        converter.ignore_images = True
+        converter.ignore_emphasis = True
+        
         text_parts = []
         for identifier in ids:
             element = soup.find(id=identifier)
             if element:
                 html_content = str(element)
-                html_content = re.sub(remove_pattern, '', html_content)
+                #html_content = re.sub(remove_pattern, '', html_content)
                 html_content = self.clean_text(html_content)
                 markdown_content = converter.handle(html_content)
                 text_parts.append(markdown_content)
@@ -154,7 +155,7 @@ class WebContentScraperEAK(WebContentScraper):
         return super().extract_category(url, position)
     
     def process_url(self, url, lastmod_date):
-        result = super().process_url(url, lastmod_date)     
+        result = super().process_url(url, lastmod_date)
         if result:
             language, category, question, answer, url, lastmod_date, lastmod_date_update = result
 
@@ -179,6 +180,8 @@ if __name__ == '__main__':
         remove_patterns = [
             'Navigation', 
             'Einkaufskorb',
+            'Seite drucken',
+            'Zum Seitenanfang',
         ]
     )
     scraper.scrape_and_store()

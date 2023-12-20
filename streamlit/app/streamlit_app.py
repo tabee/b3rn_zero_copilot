@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import requests
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 from streamlit_searchbox import st_searchbox
 
 

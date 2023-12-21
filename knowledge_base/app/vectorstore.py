@@ -52,7 +52,7 @@ def init():
     faiss_db = FAISS.from_documents(list_of_documents, embeddings)
     faiss_db.save_local(DB_PATH__BSV_ADMIN_CH_VECTORESTORE)
 
-def init_local(languages=["de"]):
+def init_local(languages=["de", "fr"]):
     db_sqlite = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
 
     list_of_documents = []
@@ -115,13 +115,13 @@ def get_suggestions_questions_local(input_text, languages=None, categories=None,
 
 if __name__ == '__main__':
 
-    user_input = "KJFG"  
+    user_input = """ Mutterschaftsentschädigung """
 
-    #init_local()
+    init_local()
     start_time = time.time()
     res = get_suggestions_questions_local(user_input, k=5)
     end_time = time.time()
-    print(f"{len(res)}, {end_time-start_time}ms, local:")
+    print(f"{len(res)}, {end_time-start_time}sec, local:")
     for r in res:
         print(r)
     
@@ -131,6 +131,6 @@ if __name__ == '__main__':
     start_time = time.time()
     res = get_suggestions_questions(user_input, k=5)
     end_time = time.time()
-    print(f"{len(res)}, {end_time-start_time}ms, openai:")
+    print(f"{len(res)}, {end_time-start_time}sec, openai:")
     for r in res:
         print(r)

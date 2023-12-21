@@ -10,4 +10,4 @@ httpx
 bs4
 python-dateutil
 html2text
-
+sentence_transformers

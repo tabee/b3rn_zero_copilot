@@ -27,6 +27,7 @@ message GetSuggestionsRequest {
     string topic = 1;
     repeated string languages = 2;
     repeated string categories = 3;
+    repeated string embeddings = 4;
 }
 
 // Antwort-Nachricht, die die Vorschläge enthält

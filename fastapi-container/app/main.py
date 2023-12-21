@@ -112,7 +112,8 @@ def call_vectorstore_for_suggestions(
         response = stub.GetSuggestionsVector(service_pb2.GetSuggestionsRequest(
             topic=topic,
             languages=None,
-            categories=None))
+            categories=None,
+            embeddings=None))
         # Extrahiert die Liste von Vorschlägen als reine Python-Liste
         suggestions = [suggestion for suggestion in response.suggestions]
         print("vectorstore received: ", suggestions)

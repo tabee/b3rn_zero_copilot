@@ -55,7 +55,7 @@ class DatabaseHandlerService(service_pb2_grpc.DatabaseHandlerServiceServicer):
     def GetSuggestionsVector(self, request, context):
         # Hier die Logik zur Abfrage der Vektor-Datenbank
         suggestions = get_suggestions_questions_vectorstore(
-            request.topic, request.languages, request.categories)
+            request.topic, request.languages, request.categories, request.embeddings)
         return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
 
 def serve():

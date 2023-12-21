@@ -64,8 +64,18 @@ def init_bsv_admin_ch_vectorstore_openai():
          path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI,
          selected_languages=['de'])
 
-def get_suggestions_questions(input_text, embeddings, languages=None, categories=None, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI):
+def get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None):
     '''Get suggestions based on input text. '''
+    if path_to_vetorestore is None:
+        path_to_vetorestore = DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI
+    else:
+        path_to_vetorestore = DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL
+    
+    if embeddings is None:
+        embeddings = OpenAIEmbeddings()
+    else:
+        embeddings = get_hugging_face_embeddings()
+
     faiss_db = FAISS.load_local(path_to_vetorestore, embeddings)
     categories = None
     if categories is None:
@@ -81,25 +91,25 @@ def get_suggestions_questions(input_text, embeddings, languages=None, categories
         return None
 
 if __name__ == '__main__':
-    init_bsv_admin_ch_vectorstore_local()
-    init_bsv_admin_ch_vectorstore_openai()
+    # init vectorstores
+    # init_bsv_admin_ch_vectorstore_local()
+    # init_bsv_admin_ch_vectorstore_openai()
 
     user_input = """ Mutterschaftsentschädigung """
     print(f"\ninput: {user_input}\n")
-
 
     print("********** local **********")
     start_time = time.time()
     res = get_suggestions_questions(input_text=user_input, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL, embeddings=get_hugging_face_embeddings(), languages=['de'])
     end_time = time.time()
-    print(f"{len(res)}, {end_time-start_time}sec:")
+    print(f"{len(res)}, {end_time-start_time} sec.")
     for r in res:
         print(r)
 
-    print("********** openai **********")
+    print("\n********** openai **********")
     start_time = time.time()
     res = get_suggestions_questions(input_text=user_input, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI, embeddings=OpenAIEmbeddings(), languages=['de'])
     end_time = time.time()
-    print(f"{len(res)}, {end_time-start_time}sec:")
+    print(f"{len(res)}, {end_time-start_time} sec.")
     for r in res:
         print(r)

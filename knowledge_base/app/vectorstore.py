@@ -64,18 +64,8 @@ def init_bsv_admin_ch_vectorstore_openai():
          path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI,
          selected_languages=['de'])
 
-def get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None):
+def _get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None):
     '''Get suggestions based on input text. '''
-    if path_to_vetorestore is None:
-        path_to_vetorestore = DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI
-    else:
-        path_to_vetorestore = DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL
-    
-    if embeddings is None:
-        embeddings = OpenAIEmbeddings()
-    else:
-        embeddings = get_hugging_face_embeddings()
-
     faiss_db = FAISS.load_local(path_to_vetorestore, embeddings)
     categories = None
     if categories is None:
@@ -90,6 +80,14 @@ def get_suggestions_questions(input_text, languages=None, categories=None, embed
         # @todo: implement category filter
         return None
 
+def get_suggestions_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=5):
+    '''Get suggestions based on input text. '''
+    return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
+def get_suggestions_questions_local(input_text, languages=None, categories=None, embeddings=None, k=5):
+    '''Get suggestions based on input text. '''
+    return _get_suggestions_questions(input_text, languages, categories, get_hugging_face_embeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL)
+
+
 if __name__ == '__main__':
     # init vectorstores
     # init_bsv_admin_ch_vectorstore_local()
@@ -100,7 +98,7 @@ if __name__ == '__main__':
 
     print("********** local **********")
     start_time = time.time()
-    res = get_suggestions_questions(input_text=user_input, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL, embeddings=get_hugging_face_embeddings(), languages=['de'])
+    res = get_suggestions_questions_local(input_text=user_input)
     end_time = time.time()
     print(f"{len(res)}, {end_time-start_time} sec.")
     for r in res:
@@ -108,7 +106,7 @@ if __name__ == '__main__':
 
     print("\n********** openai **********")
     start_time = time.time()
-    res = get_suggestions_questions(input_text=user_input, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI, embeddings=OpenAIEmbeddings(), languages=['de'])
+    res = get_suggestions_questions_openai(input_text=user_input)
     end_time = time.time()
     print(f"{len(res)}, {end_time-start_time} sec.")
     for r in res:

@@ -20,6 +20,7 @@ service DatabaseHandlerService {
     // Die Funktion, die aufgerufen werden soll
     rpc GetSuggestions (GetSuggestionsRequest) returns (GetSuggestionsResponse);
     rpc GetSuggestionsVector (GetSuggestionsRequest) returns (GetSuggestionsResponse);
+    rpc GetSuggestionsVectorLocal (GetSuggestionsRequest) returns (GetSuggestionsResponse);
 }
 
 // Anfrage-Nachricht, die die erforderlichen Parameter enthält
@@ -27,7 +28,6 @@ message GetSuggestionsRequest {
     string topic = 1;
     repeated string languages = 2;
     repeated string categories = 3;
-    repeated string embeddings = 4;
 }
 
 // Antwort-Nachricht, die die Vorschläge enthält

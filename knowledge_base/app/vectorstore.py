@@ -96,7 +96,6 @@ if __name__ == '__main__':
     for r in res:
         print(r)
 
-
     print("********** openai **********")
     start_time = time.time()
     res = get_suggestions_questions(input_text=user_input, k=5, path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI, embeddings=OpenAIEmbeddings(), languages=['de'])

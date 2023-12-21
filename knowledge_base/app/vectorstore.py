@@ -16,7 +16,7 @@ DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL = DB_PATH + '/bsv_faq_demo_vectorestore_
 
 #@todo: class VectorStore:
 
-def get_hugging_face_embeddings():
+def _get_hugging_face_embeddings():
     '''Get HuggingFaceEmbeddings.'''
     model_name = "sentence-transformers/all-mpnet-base-v2"
     # model_name = "SentenceTransformer('sentence-transformers/multi-qa-MiniLM-L6-cos-v1')
@@ -27,8 +27,7 @@ def get_hugging_face_embeddings():
         model_kwargs=model_kwargs,
         encode_kwargs=encode_kwargs
     )
-
-def ignite_vectorstore(database_handler, embeddings, path_to_vetorestore, selected_languages=None):
+def _ignite_vectorstore(database_handler, embeddings, path_to_vetorestore, selected_languages=None):
     print(f"ignite vectorstore {path_to_vetorestore}")
     list_of_documents = []
     categories = database_handler.get_unique_categories(selected_languages)
@@ -49,20 +48,19 @@ def ignite_vectorstore(database_handler, embeddings, path_to_vetorestore, select
         
     faiss_db = FAISS.from_documents(list_of_documents, embeddings)
     faiss_db.save_local(path_to_vetorestore)
-
 def init_bsv_admin_ch_vectorstore_local():
     '''Init vectorstore (bsv-faq) with local embeddings.'''
-    ignite_vectorstore(database_handler=DatabaseHandler(DB_PATH__BSV_ADMIN_CH),
-         embeddings=get_hugging_face_embeddings(),
+    _ignite_vectorstore(database_handler=DatabaseHandler(DB_PATH__BSV_ADMIN_CH),
+         embeddings=_get_hugging_face_embeddings(),
          path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL,
          selected_languages=['de'])
-
 def init_bsv_admin_ch_vectorstore_openai():
     '''Init vectorstore (bsv-faq) with openai embeddings.'''
-    ignite_vectorstore(database_handler=DatabaseHandler(DB_PATH__BSV_ADMIN_CH),
+    _ignite_vectorstore(database_handler=DatabaseHandler(DB_PATH__BSV_ADMIN_CH),
          embeddings=OpenAIEmbeddings(),
          path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI,
          selected_languages=['de'])
+
 
 def _get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None):
     '''Get suggestions based on input text. '''
@@ -79,13 +77,12 @@ def _get_suggestions_questions(input_text, languages=None, categories=None, embe
     else:
         # @todo: implement category filter
         return None
-
 def get_suggestions_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=5):
     '''Get suggestions based on input text. '''
     return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
 def get_suggestions_questions_local(input_text, languages=None, categories=None, embeddings=None, k=5):
     '''Get suggestions based on input text. '''
-    return _get_suggestions_questions(input_text, languages, categories, get_hugging_face_embeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL)
+    return _get_suggestions_questions(input_text, languages, categories, _get_hugging_face_embeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL)
 
 
 if __name__ == '__main__':
@@ -93,7 +90,7 @@ if __name__ == '__main__':
     # init_bsv_admin_ch_vectorstore_local()
     # init_bsv_admin_ch_vectorstore_openai()
 
-    user_input = """ Mutterschaftsentschädigung """
+    user_input = """ AHV21 """
     print(f"\ninput: {user_input}\n")
 
     print("********** local **********")

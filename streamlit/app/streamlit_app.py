@@ -13,7 +13,8 @@ def search_function(topic):
     
 
     if topic:
-        response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        #response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        response = requests.get(f'http://localhost:80/suggest/{topic}')
         if response.status_code == 200:
             suggestions = response.json()
             for suggestion in suggestions:
@@ -30,31 +31,6 @@ if selected_value:
     answer = "This is the answer to your question."
     st.chat_message("🔗").write(answer)
 
-
-
-  # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    # React to user input
-    if prompt := st.chat_input("Enter your message"):
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-       
-        respomse_output = "some response"
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            st.markdown(respomse_output)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": respomse_output})
 
 
 

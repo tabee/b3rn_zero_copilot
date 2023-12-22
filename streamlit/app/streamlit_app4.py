@@ -29,33 +29,38 @@ if "messages" not in st.session_state:
 
 
 with st.empty():
-    selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=True, placeholder="Message to ResearchCopilot...")
-
-    if selected_value:
-
-        st.session_state.messages.append({"role": "user", "content": selected_value})
-        st.session_state.messages.append({"role": "assistant", "content": "fake answert"})
-
-        st.empty()
+    if (len(st.session_state.messages) <= 2):
+        selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=True, placeholder="Message to ResearchCopilot...")
 
 
+        if selected_value:
+
+            st.session_state.messages.append({"role": "user", "content": selected_value})
+            st.session_state.messages.append({"role": "assistant", "content": "fake answert"})
+
+            st.empty()
+        
+            selected_value = st.empty()
+
+
+
+
+
+if (len(st.session_state.messages) <= 2):
+    
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
 
 
 if (len(st.session_state.messages) > 2):
-
     if prompt := st.chat_input():
         if not openai_api_key:
             st.info("Please add your OpenAI API key to continue.")
             st.stop()
 
-        if prompt != "":
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            response = "answer to your question"
-            st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        response = "answer to your question " + prompt
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
-    
-
-
-
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])

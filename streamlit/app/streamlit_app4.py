@@ -26,31 +26,19 @@ with st.sidebar:
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
-
-
 with st.empty():
     if (len(st.session_state.messages) <= 2):
         selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=True, placeholder="Message to ResearchCopilot...")
-
-
         if selected_value:
-
             st.session_state.messages.append({"role": "user", "content": selected_value})
-            st.session_state.messages.append({"role": "assistant", "content": "fake answert"})
-
+            st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {selected_value}"})
+            print(selected_value)
             st.empty()
-        
             selected_value = st.empty()
 
-
-
-
-
 if (len(st.session_state.messages) <= 2):
-    
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
-
 
 if (len(st.session_state.messages) > 2):
     if prompt := st.chat_input():

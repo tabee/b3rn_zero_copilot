@@ -45,27 +45,18 @@ if "messages" not in st.session_state:
 
 
 
-# kann man entfernen ... soll nur zeigen wie es geht ohne st.empty()
-selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=False, placeholder="Message to ResearchCopilot...")
-if selected_value:
-    st.session_state.messages.append({"role": "user", "content": selected_value})
-    st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {selected_value}"})
-
-
-
-
-
-with st.empty():
+# when entter counter ?????
+value = len(st.session_state.messages) 
+if (value == 1):
+    selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=False, placeholder="Message to ResearchCopilot...")
     
-    if (len(st.session_state.messages) <= 2):
+    if selected_value:
+        st.session_state.messages.append({"role": "user", "content": selected_value})
+        st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {selected_value}"})
         
-        selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=False, placeholder="Message to ResearchCopilot...")
-        if selected_value:
-            st.session_state.messages.append({"role": "user", "content": selected_value})
-            st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {selected_value}"})
-            print(selected_value)
-            st.empty()
-            selected_value = st.empty()
+
+
+
 
 if (len(st.session_state.messages) <= 2):
     for msg in st.session_state.messages:

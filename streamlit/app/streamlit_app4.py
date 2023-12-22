@@ -9,6 +9,25 @@ import streamlit as st
 import time
 import requests
 
+
+# PROBLEM
+# search_function kommt mit st.empty() nicht klar!
+def search_function(topic):
+    """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
+    #time.sleep(2)
+    if topic:
+        #response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        response = requests.get(f'http://localhost:80/suggest/{topic}')
+        if response.status_code == 200:
+            suggestions = response.json()
+            for suggestion in suggestions[0:3]:
+                st.write(suggestion)
+        else:
+            time.sleep(2)
+
+        return suggestions
+
+
 with st.sidebar:
     
     if not 'OPENAI_API_KEY' in os.environ:
@@ -20,31 +39,26 @@ with st.sidebar:
     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
+
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you? :-)"}]
 
+
+
+# kann man entfernen ... soll nur zeigen wie es geht ohne st.empty()
+selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=False, placeholder="Message to ResearchCopilot...")
+if selected_value:
+    st.session_state.messages.append({"role": "user", "content": selected_value})
+    st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {selected_value}"})
+
+
+
+
+
 with st.empty():
-
-
-    # PROBLEM
-    # search_function kommt mit st.empty() nicht klar!
-
-    def search_function(topic):
-        """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
-        time.sleep(2)
-        if topic:
-            #response = requests.get(f'http://fastapi:80/suggest/{topic}')
-            response = requests.get(f'http://localhost:80/suggest/{topic}')
-            if response.status_code == 200:
-                suggestions = response.json()
-                for suggestion in suggestions[0:3]:
-                    st.write(suggestion)
-            else:
-                time.sleep(2)
-
-            return suggestions
-
+    
     if (len(st.session_state.messages) <= 2):
+        
         selected_value = st_searchbox(search_function, key="faq_searchbox", clear_on_submit=False, placeholder="Message to ResearchCopilot...")
         if selected_value:
             st.session_state.messages.append({"role": "user", "content": selected_value})

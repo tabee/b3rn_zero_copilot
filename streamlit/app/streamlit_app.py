@@ -12,8 +12,8 @@ import requests
 def search_function(topic):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
     if topic:
-        #response = requests.get(f'http://fastapi:80/suggest/{topic}')
-        response = requests.get(f'http://localhost:80/suggest/{topic}')
+        response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        #response = requests.get(f'http://localhost:80/suggest/{topic}')
         if response.status_code == 200:
             suggestions = response.json()
             return suggestions

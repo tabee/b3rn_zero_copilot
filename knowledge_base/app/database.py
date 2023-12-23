@@ -168,26 +168,26 @@ if __name__ == '__main__':
         sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
         remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n', 'Answer\n', '\n']
     )
-    scraper__bsv_admin_ch.scrape_and_store()
+    #scraper__bsv_admin_ch.scrape_and_store()
 
 
 
     
-    # faq = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
+    # faq = database__bsv_admin_ch.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
     # for q,a in faq[0:2]:
     #     print(f"Frage: {q}\nAntwort: {a}\n")
 
     # print("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?")
     print("********** get_answer **********")
-    print(db.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
+    print(database__bsv_admin_ch.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
     
     #print(db.get_unique_categories(["de"]))
 
 
-    res = db.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
-    res = db.get_suggestions_questions("Wie erhalte ich")
+    res = database__bsv_admin_ch.get_suggestions_questions("Wie erhalte ich", ["de"], ["alters-und-hinterlassenenversicherung-ahv"])
+    res = database__bsv_admin_ch.get_suggestions_questions("Wie erhalte ich")
     print(f"\nResult: {len(res)} rows")
     for r in res:
         print(r)
 
-    #print(f"Check if url exists: {db.check_if_url_exists('https://faq.bsv.admin.ch/fr/assurance-vieillesse-et-survivants-avs/les-refugies-en-provenance-dukraine-doivent-ils-payer-des')}")
+    #print(f"Check if url exists: {database__bsv_admin_ch.check_if_url_exists('https://faq.bsv.admin.ch/fr/assurance-vieillesse-et-survivants-avs/les-refugies-en-provenance-dukraine-doivent-ils-payer-des')}")

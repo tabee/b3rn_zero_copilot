@@ -10,11 +10,18 @@ import time
 import requests
 from urllib.parse import quote
 
+# dirty hack to switch between local and docker container, depending on the environment sys_path
+sys_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__)))
+server_name = "fastapi"
+if str(sys_path).startswith('/workspaces'):
+    server_name = "127.0.0.1"
+    print(f"workspaces ... set server_name to {server_name}")
+# end dirty hack
+
 def search_function(topic):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
     if topic:
-        #response = requests.get(f'http://fastapi:80/suggest/{topic}')
-        response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        response = requests.get(f'http://{server_name}:80/suggest/{topic}')
         if response.status_code == 200:
             suggestions = response.json()
             return suggestions
@@ -27,16 +34,9 @@ def search_function(topic):
 def get_answer(question):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
     if question:
-        #response = requests.get(f'http://fastapi:80/sqlite/answer/{question}')
-        #response = requests.get(f'http://localhost:80/sqlite/answer/{question}')
-        print(question)
-        print("***")
-        # Kodieren des Strings für die URL
-        encoded_question = quote(question)
-        response = requests.get(f'http://fastapi:80/sqlite/answer/{encoded_question}')
+        encoded_question = quote(question) # Kodieren des Strings für die URL
+        response = requests.get(f'http://{server_name}:80/sqlite/answer/{encoded_question}')
 
-   
-              
         if response.status_code == 200:
             suggestions = response.json()
             return suggestions

@@ -7,15 +7,19 @@ import streamlit as st
 from streamlit_searchbox import st_searchbox
 import streamlit as st
 import time
+import asyncio
+import httpx
 import requests
 from urllib.parse import quote
+from starlette.responses import StreamingResponse
+
 
 # dirty hack to switch between local and docker container, depending on the environment sys_path
 sys_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__)))
 server_name = "fastapi"
 if str(sys_path).startswith('/workspaces'):
     server_name = "127.0.0.1"
-    print(f"workspaces ... set server_name to {server_name}")
+    #print(f"workspaces ... set server_name to {server_name}")
 # end dirty hack
 
 def search_function(topic):
@@ -28,8 +32,6 @@ def search_function(topic):
         else:
             time.sleep(1)
         return suggestions
-    
-
 
 def get_answer(question):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
@@ -43,6 +45,24 @@ def get_answer(question):
         else:
             return "Sorry, I don't know the answer to your question."
 
+async def get_agent_answer(question):
+    """ Wrapper function for getting suggestions, passing the necessary parameters. """
+    if not question:
+        return None
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f'http://{server_name}:80/agent/{question}')
+        
+        # Assuming the response is a stream of data
+        async def stream_generator():
+            async for line in response.aiter_lines():
+                if line:
+                    yield line + "\n"
+
+        return StreamingResponse(stream_generator(), media_type="text/plain")
+
+
+
 with st.sidebar:
     if not 'OPENAI_API_KEY' in os.environ:
         openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
@@ -55,6 +75,7 @@ with st.sidebar:
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
+# f.a.q. mode
 if len(st.session_state.messages) == 0:
     prompt1 = st_searchbox(search_function, key="box_to_search", clear_on_submit=False, placeholder="Ask me anything ...")
     if prompt1:
@@ -62,7 +83,7 @@ if len(st.session_state.messages) == 0:
         answer = get_answer(prompt1)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.rerun()
-
+# chat mode
 else:
     if prompt := st.chat_input():
         if not openai_api_key:
@@ -72,11 +93,18 @@ else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         for msg in st.session_state.messages:
             st.chat_message(msg["role"]).write(msg["content"])
+        
         with st.spinner("thinking ..."):
+            async def get_response_text():
+                response = await get_agent_answer(prompt)
+                response_text = ''
+                async for part in response.body_iterator:
+                    response_text += part  # Annahme, dass die Antwort in Bytes ist
+                return response_text
+
+            response_text = asyncio.run(get_response_text())
             
-            time.sleep(2)
-            response = "answer to your question " + prompt
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.messages.append({"role": "assistant", "content": response_text})
             st.rerun()
 
 for msg in st.session_state.messages:

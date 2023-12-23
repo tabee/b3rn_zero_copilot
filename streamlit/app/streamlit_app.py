@@ -12,8 +12,8 @@ import requests
 def search_function(topic):
     """ Wrapper-Funktion für get_suggestions, die die erforderlichen Parameter übergibt. """
     if topic:
-        response = requests.get(f'http://fastapi:80/suggest/{topic}')
-        #response = requests.get(f'http://localhost:80/suggest/{topic}')
+        #response = requests.get(f'http://fastapi:80/suggest/{topic}')
+        response = requests.get(f'http://localhost:80/suggest/{topic}')
         if response.status_code == 200:
             suggestions = response.json()
             return suggestions
@@ -24,10 +24,9 @@ def search_function(topic):
 with st.sidebar:
     if not 'OPENAI_API_KEY' in os.environ:
         openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
     else:
         openai_api_key = os.environ['OPENAI_API_KEY']
-    
-    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
     "[View the source code](https://github.com/tabee/b3rn_zero_copilot)"
     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/tabee/b3rn_zero_copilot?quickstart=1)"
 
@@ -36,10 +35,6 @@ if "messages" not in st.session_state:
 
 if len(st.session_state.messages) == 0:
     prompt1 = st_searchbox(search_function, key="box_to_search", clear_on_submit=False, placeholder="Ask me anything ...")
-    def start_chat():
-        st.session_state.chatmode = True
-        st.write("Chat started")
-        st.rerun()
     if prompt1:
         st.session_state.messages.append({"role": "user", "content": prompt1})
         st.session_state.messages.append({"role": "assistant", "content": f"fake answert to your {prompt1}"})
@@ -52,8 +47,14 @@ else:
             st.stop()
 
         st.session_state.messages.append({"role": "user", "content": prompt})
-        response = "answer to your question " + prompt
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        for msg in st.session_state.messages:
+            st.chat_message(msg["role"]).write(msg["content"])
+        with st.spinner("thinking ..."):
+            
+            time.sleep(2)
+            response = "answer to your question " + prompt
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.rerun()
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])

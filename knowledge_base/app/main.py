@@ -52,6 +52,13 @@ class DatabaseHandlerService(service_pb2_grpc.DatabaseHandlerServiceServicer):
         suggestions = db__bsv_admin_ch.get_suggestions_questions(
             request.topic, request.languages, request.categories)
         return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
+    
+    def GetAnswer(self, request, context):
+        # Hier die Logik zur Abfrage der Datenbank
+        answer = db__bsv_admin_ch.get_answer(
+            request.answer)
+        return service_pb2.GetAnswerResponse(answer=answer)
+
     def GetSuggestionsVector(self, request, context):
         # Hier die Logik zur Abfrage der Vektor-Datenbank
         suggestions = get_suggestions_questions_openai(

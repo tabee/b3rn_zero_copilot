@@ -167,7 +167,8 @@ if __name__ == '__main__':
     #     print(f"Frage: {q}\nAntwort: {a}\n")
 
     # print("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?")
-    # print(db.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
+    print("********** get_answer **********")
+    print(db.get_answer("Wie erhalte ich eine AHV-Nummer für mein neugeborenes Kind?"))
     
     #print(db.get_unique_categories(["de"]))
 

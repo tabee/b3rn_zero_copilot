@@ -87,6 +87,44 @@ def call_sqlite_database_for_suggestions(
         suggestions = [suggestion for suggestion in response.suggestions]
         print("sqlite received: ", suggestions)
         return suggestions
+    
+
+
+
+@app.get("/sqlite/answer/{question}")
+def call_sqlite_database_for_answer(
+    question: str = Path(..., description="Das Frage, für die eine Antwort abgerufen werden sollen.")
+):
+    """
+    Ruft eine Antwort basierend auf exakte Frage ab.
+
+    Vorteil: schnell, sucht die Antwort in einer SQLite-Datenbank.
+    Nachteil: Unterstützt nur eine exakte Suche.
+
+    Dieser Endpoint kommuniziert mit einem gRPC-basierten Microservice, um eine 
+    Antworten zu einem bestimmten Frage zu erhalten.
+
+    Args:
+        question (str): Die Frage, für das Vorschläge abgerufen werden sollen.
+
+    Returns:
+        SuggestionResponse: Eine Liste von Vorschlägen als Strings.
+    """
+    with grpc.insecure_channel('knowledge_base:50052') as channel:
+        stub = service_pb2_grpc.DatabaseHandlerServiceStub(channel)
+        response = stub.GetAnswer(service_pb2.GetAnswerRequest(
+            answer=question,
+            languages=None,
+            categories=None))
+        print(f"\n response: {response}\n**************\n")
+        # Extrahiert die Liste von Vorschlägen als reine Python-Liste
+        #suggestions = [suggestion for suggestion in response.answer]
+        #print("sqlite received answer: ", suggestions)
+        return response.answer
+
+
+
+
 
 @app.get("/vectorstore/suggest/{topic}")
 def call_vectorstore_for_suggestions(

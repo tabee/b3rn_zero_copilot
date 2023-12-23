@@ -19,8 +19,21 @@ message PromptReply {
 service DatabaseHandlerService {
     // Die Funktion, die aufgerufen werden soll
     rpc GetSuggestions (GetSuggestionsRequest) returns (GetSuggestionsResponse);
+    rpc GetAnswer (GetAnswerRequest) returns (GetAnswerResponse);
     rpc GetSuggestionsVector (GetSuggestionsRequest) returns (GetSuggestionsResponse);
     rpc GetSuggestionsVectorLocal (GetSuggestionsRequest) returns (GetSuggestionsResponse);
+}
+
+// Exakte Frage, zum beantworten
+message GetAnswerRequest {
+    string answer = 1;
+    repeated string languages = 2;
+    repeated string categories = 3;
+}
+
+// Antwort-Nachricht, die die Antwort enthält
+message GetAnswerResponse {
+    string answer = 1;
 }
 
 // Anfrage-Nachricht, die die erforderlichen Parameter enthält

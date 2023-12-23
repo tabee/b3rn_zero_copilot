@@ -96,7 +96,7 @@ else:
         
         with st.spinner("thinking ..."):
             async def get_response_text():
-                response = await get_agent_answer(prompt)
+                response = await get_agent_answer(str(st.session_state.messages))
                 response_text = ''
                 async for part in response.body_iterator:
                     response_text += part  # Annahme, dass die Antwort in Bytes ist

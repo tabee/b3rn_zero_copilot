@@ -16,4 +16,4 @@ HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 # here we store the db's
 ENV DATA_PATH /app/data/
 
-ENTRYPOINT ["streamlit", "run", "streamlit_app4.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,5 +1,7 @@
 import os
 import sqlite3
+from content_scraper import WebContentScraper, WebContentScraperEAK
+
 
 class DatabaseHandler:
     def __init__(self, db_path, timeout=1):
@@ -160,7 +162,16 @@ class DatabaseHandler:
 
 if __name__ == '__main__':
     DB_PATH__BSV_ADMIN_CH = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data')) + '/bsv_faq.db'
-    db = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
+    database__bsv_admin_ch = DatabaseHandler(DB_PATH__BSV_ADMIN_CH)
+    scraper__bsv_admin_ch = WebContentScraper(
+        database=database__bsv_admin_ch,
+        sitemap_url='https://faq.bsv.admin.ch/sitemap.xml',
+        remove_patterns=['Antwort\n', 'Rispondi\n', 'Réponse\n', 'Answer\n', '\n']
+    )
+    scraper__bsv_admin_ch.scrape_and_store()
+
+
+
     
     # faq = db.get_questions_answers_by_category("alters-und-hinterlassenenversicherung-ahv")
     # for q,a in faq[0:2]:

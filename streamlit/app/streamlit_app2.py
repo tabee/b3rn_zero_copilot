@@ -48,38 +48,30 @@ def get_answer(question):
         else:
             return "Sorry, I don't know the answer to your question."
 
-async def get_agent_answer(question):
-    """ Wrapper function for getting suggestions, passing the necessary parameters. """
-    if not question:
-        return None
-    message_placeholder = st.empty()
-
-    async with httpx.AsyncClient() as client:      
-        # Assuming the response is a stream of data
-        response_text = ""
-        async def stream_generator():
-            async for line in await client.get(f'http://{server_name}:80/agent/{question}'):
-                print(line, end="", flush=True)   
-                response_text += line
-
-        foo = StreamingResponse(await stream_generator(), media_type="text/plain")
-
-        print("completed")
-        print(f"response_text: {response_text}")
-        return foo
+def is_complete_response(buffer):
+    """Determine if the buffer contains a complete response."""
+    return buffer.endswith('.') or buffer.endswith('\n') or buffer.endswith(',') or buffer.endswith('?')
 
 async def call_agent_for_grpc(parameter: str):
-    '''Call the gRPC agent service with the given parameter and stream the response'''
-    # change localhost to the IP address of the agent service !!!!!!!!!!!
+    '''Call the gRPC agent service with the given parameter and stream the response.'''
     async with grpc.aio.insecure_channel('0.0.0.0:50051') as channel:
         stub = service_pb2_grpc.PromptServiceStub(channel)
-        buffer = ""  # Buffer to aggregate fragments
-        async for response in stub.GetResponseStream(
-            service_pb2.PromptRequest(prompt=parameter)):
-            buffer += response.answer
-            if buffer.endswith('.'):  # Check if buffer ends with a period
-                print(buffer, end="", flush=True)
-                buffer = ""  # Reset the buffer
+        buffer = ""
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+
+            async for response in stub.GetResponseStream(service_pb2.PromptRequest(prompt=parameter)):
+                buffer += response.answer
+                if is_complete_response(buffer):  # Define a function to determine completeness of the response
+                    full_response += buffer
+                    message_placeholder.markdown(full_response)  # Update Streamlit placeholder with the complete response
+                    buffer = ""  # Reset the buffer after updating
+
+            return full_response
+
+
 
 with st.sidebar:
     if not 'OPENAI_API_KEY' in os.environ:
@@ -112,12 +104,9 @@ else:
         for msg in st.session_state.messages:
             st.chat_message(msg["role"]).write(msg["content"])
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            asyncio.run(call_agent_for_grpc(parameter=prompt))
-
-            #Add assistant response to chat history
-            st.session_state.messages.append({"role": "assistant", "content": "dummy answer"})
+        final_answer = asyncio.run(call_agent_for_grpc(parameter=prompt))
+        #Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": final_answer})
     
         st.rerun()
 

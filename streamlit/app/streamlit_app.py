@@ -12,6 +12,9 @@ import httpx
 import requests
 from urllib.parse import quote
 from starlette.responses import StreamingResponse
+import grpc
+import service_pb2
+import service_pb2_grpc
 
 
 # dirty hack to switch between local and docker container, depending on the environment sys_path
@@ -45,21 +48,28 @@ def get_answer(question):
         else:
             return "Sorry, I don't know the answer to your question."
 
-async def get_agent_answer(question):
-    """ Wrapper function for getting suggestions, passing the necessary parameters. """
-    if not question:
-        return None
+def is_complete_response(buffer):
+    """Determine if the buffer contains a complete response."""
+    return buffer.endswith('.') or buffer.endswith('\n')
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f'http://{server_name}:80/agent/{question}')
-        
-        # Assuming the response is a stream of data
-        async def stream_generator():
-            async for line in response.aiter_lines():
-                if line:
-                    yield line + "\n"
+async def call_agent_for_grpc(parameter: str):
+    '''Call the gRPC agent service with the given parameter and stream the response.'''
+    async with grpc.aio.insecure_channel('langchain:50051') as channel:
+        stub = service_pb2_grpc.PromptServiceStub(channel)
+        buffer = ""
 
-        return StreamingResponse(stream_generator(), media_type="text/plain")
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+
+            async for response in stub.GetResponseStream(service_pb2.PromptRequest(prompt=parameter)):
+                buffer += response.answer
+                if is_complete_response(buffer):  # Define a function to determine completeness of the response
+                    full_response += buffer
+                    message_placeholder.markdown(full_response)  # Update Streamlit placeholder with the complete response
+                    buffer = ""  # Reset the buffer after updating
+
+            return full_response
 
 
 
@@ -93,19 +103,13 @@ else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         for msg in st.session_state.messages:
             st.chat_message(msg["role"]).write(msg["content"])
-        
-        with st.spinner("thinking ..."):
-            async def get_response_text():
-                response = await get_agent_answer(str(st.session_state.messages))
-                response_text = ''
-                async for part in response.body_iterator:
-                    response_text += part  # Annahme, dass die Antwort in Bytes ist
-                return response_text
 
-            response_text = asyncio.run(get_response_text())
-            
-            st.session_state.messages.append({"role": "assistant", "content": response_text})
-            st.rerun()
+        final_answer = asyncio.run(call_agent_for_grpc(parameter=prompt))
+        #Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": final_answer})
+    
+        st.rerun()
+
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])

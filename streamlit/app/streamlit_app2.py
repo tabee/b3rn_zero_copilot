@@ -100,25 +100,21 @@ else:
         with st.chat_message("assistant"):
             async def get_response_text():
                 ''' Wrapper function for getting streaming answer, passing the necessary parameters.'''
+                message_placeholder = st.empty()
+                full_response = ""
                 response = await get_agent_answer(str(st.session_state.messages))
-                response_text = ''
+                full_response = ''
                 async for part in response.body_iterator:
-                    response_text += part  # Annahme, dass die Antwort in Bytes ist
-
-                print(response_text)    
-                return response_text
-
-            message_placeholder = st.empty()
-            full_response = ""
-            assistant_response = asyncio.run(get_response_text())
-            # Simulate stream of response with milliseconds delay
-            for chunk in assistant_response.split():
-                full_response += chunk + " "
-                time.sleep(0.04)
-                # Add a blinking cursor to simulate typing
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
+                    time.sleep(0.01)
+                    full_response += part + " "  # Annahme, dass die Antwort in Bytes ist
+                    message_placeholder.markdown(part + "▌")
+                    print(part)
+                message_placeholder.markdown(full_response)
+                print("completed")
+                return full_response
             
+            full_response = asyncio.run(get_response_text())
+
         #Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()

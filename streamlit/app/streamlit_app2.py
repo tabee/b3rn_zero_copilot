@@ -12,6 +12,9 @@ import httpx
 import requests
 from urllib.parse import quote
 from starlette.responses import StreamingResponse
+import grpc
+import service_pb2
+import service_pb2_grpc
 
 
 # dirty hack to switch between local and docker container, depending on the environment sys_path
@@ -65,9 +68,18 @@ async def get_agent_answer(question):
         print(f"response_text: {response_text}")
         return foo
 
-
-
-
+async def call_agent_for_grpc(parameter: str):
+    '''Call the gRPC agent service with the given parameter and stream the response'''
+    # change localhost to the IP address of the agent service !!!!!!!!!!!
+    async with grpc.aio.insecure_channel('0.0.0.0:50051') as channel:
+        stub = service_pb2_grpc.PromptServiceStub(channel)
+        buffer = ""  # Buffer to aggregate fragments
+        async for response in stub.GetResponseStream(
+            service_pb2.PromptRequest(prompt=parameter)):
+            buffer += response.answer
+            if buffer.endswith('.'):  # Check if buffer ends with a period
+                print(buffer, end="", flush=True)
+                buffer = ""  # Reset the buffer
 
 with st.sidebar:
     if not 'OPENAI_API_KEY' in os.environ:
@@ -102,16 +114,11 @@ else:
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
-            async def get_response_text():
-                ''' Wrapper function for getting streaming answer, passing the necessary parameters.'''
-                foo = await get_agent_answer(str(st.session_state.messages))
-                print(foo)
-             
-            
-            full_response = asyncio.run(get_response_text())
-            
-        #Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+            asyncio.run(call_agent_for_grpc(parameter=prompt))
+
+            #Add assistant response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": "dummy answer"})
+    
         st.rerun()
 
 

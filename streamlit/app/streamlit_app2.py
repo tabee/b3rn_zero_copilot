@@ -49,17 +49,21 @@ async def get_agent_answer(question):
     """ Wrapper function for getting suggestions, passing the necessary parameters. """
     if not question:
         return None
+    message_placeholder = st.empty()
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f'http://{server_name}:80/agent/{question}')
-        
+    async with httpx.AsyncClient() as client:      
         # Assuming the response is a stream of data
+        response_text = ""
         async def stream_generator():
-            async for line in response.aiter_lines():
-                if line:
-                    yield line + "\n"
+            async for line in await client.get(f'http://{server_name}:80/agent/{question}'):
+                print(line, end="", flush=True)   
+                response_text += line
 
-        return StreamingResponse(stream_generator(), media_type="text/plain")
+        foo = StreamingResponse(await stream_generator(), media_type="text/plain")
+
+        print("completed")
+        print(f"response_text: {response_text}")
+        return foo
 
 
 
@@ -100,21 +104,12 @@ else:
         with st.chat_message("assistant"):
             async def get_response_text():
                 ''' Wrapper function for getting streaming answer, passing the necessary parameters.'''
-                message_placeholder = st.empty()
-                full_response = ""
-                response = await get_agent_answer(str(st.session_state.messages))
-                full_response = ''
-                async for part in response.body_iterator:
-                    time.sleep(0.01)
-                    full_response += part + " "  # Annahme, dass die Antwort in Bytes ist
-                    message_placeholder.markdown(part + "▌")
-                    print(part)
-                message_placeholder.markdown(full_response)
-                print("completed")
-                return full_response
+                foo = await get_agent_answer(str(st.session_state.messages))
+                print(foo)
+             
             
             full_response = asyncio.run(get_response_text())
-
+            
         #Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()

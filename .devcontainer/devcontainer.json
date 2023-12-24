@@ -1,4 +1,10 @@
 {
     "name": "b3rn zero copilot",
-    "postCreateCommand": "build.sh"
-}
+
+    // Zusätzliche Einstellungen wie Erweiterungen, die in der Entwicklungsumgebung installiert werden sollen
+    "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools"
+    ]
+  }
+  

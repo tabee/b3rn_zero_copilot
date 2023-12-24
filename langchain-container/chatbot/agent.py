@@ -25,5 +25,6 @@ def agent_for(topic="Elefanten"):
         yield chunks
 
 if __name__ == "__main__":
+    print("Finaly... ggg Go go:\n")
     for chunk in agent_for(topic="Elefanten"):
         print(chunk, end="", flush=True)

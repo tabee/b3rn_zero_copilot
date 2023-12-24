@@ -9,7 +9,7 @@ def agent_for(topic="Elefanten"):
         [
             (
                 "system",
-                """Erzähl eine lange Geschichte 
+                """Erzähl ein Witz, der ca. 300 zeichen lang ist 
                 wie Chuck Norris über {topic} denken 
                 könnte. Begründe ausführlich:\n\n""",
             ),

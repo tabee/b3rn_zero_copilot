@@ -4,7 +4,7 @@ faiss-cpu
 tiktoken
 grpcio
 grpcio-tools
-fastapi
+#fastapi
 uvicorn
 httpx
 bs4

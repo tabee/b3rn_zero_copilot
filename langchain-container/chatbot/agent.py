@@ -2,26 +2,17 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
-from langchain.cache import RedisCache
-from langchain.globals import set_llm_cache
-import redis
-from langchain.cache import RedisSemanticCache
-from langchain.embeddings import OpenAIEmbeddings
-import langchain
-
-
 
 def agent_for(topic="Elefanten"):
     '''Agent, der eine Geschichte über ein Thema erzählt'''
-
 
     prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """Erzähl ein Witz, der ca. 300 zeichen lang ist 
-                wie Chuck Norris über {topic} denken 
-                könnte. Begründe ausführlich:\n\n""",
+                """bisherige Konversation {topic}\n\n 
+                Versuche die letzte Anfrage des humans zu beantworten.
+                Du bist schweizer sozialversucherungsexperte:\n\n""",
             ),
             ("human", "{topic}"),
             ]

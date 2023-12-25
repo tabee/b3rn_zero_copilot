@@ -2,9 +2,20 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
+from langchain.cache import RedisCache
+from langchain.globals import set_llm_cache
+import redis
+
+REDIS_URL = "redis://redis_cache:6379"
 
 def agent_for(topic="Elefanten"):
     '''Agent, der eine Geschichte über ein Thema erzählt'''
+    
+    # Erstellen Sie eine Redis-Client-Instanz
+    redis_client = redis.Redis.from_url(REDIS_URL)
+    set_llm_cache(RedisCache(redis_client))
+    print(f"Redis-Client: {redis_client}")
+
     prompt = ChatPromptTemplate.from_messages(
         [
             (

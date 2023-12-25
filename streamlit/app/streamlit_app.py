@@ -54,6 +54,32 @@ def is_complete_response(buffer):
 
 async def call_agent_for_grpc(parameter: str):
     '''Call the gRPC agent service with the given parameter and stream the response.'''
+    try:
+        #async with httpx.AsyncClient() as client:
+        #    async with client.stream("GET", f"http://{server_name}:80/grpc/answer/{parameter}") as response:
+        #        async for chunk in response.aiter_lines():
+        #            yield chunk
+        async with grpc.aio.insecure_channel('langchain:50051') as channel:
+            stub = service_pb2_grpc.PromptServiceStub(channel)
+            buffer = ""
+
+            with st.chat_message("assistant"):
+                message_placeholder = st.empty()
+                full_response = ""
+
+                async for response in stub.GetResponseStream(service_pb2.PromptRequest(prompt=parameter)):
+                    buffer += response.answer
+                    if is_complete_response(buffer):  # Define a function to determine completeness of the response
+                        full_response += buffer
+                        message_placeholder.markdown(full_response)  # Update Streamlit placeholder with the complete response
+                        buffer = ""  # Reset the buffer after updating
+                return full_response
+    except grpc.RpcError as e:
+        print(f"Error calling gRPC service {e}")
+        return "Sorry, I don't know the answer to your question: " + str(e)
+       
+    
+    
     async with grpc.aio.insecure_channel('langchain:50051') as channel:
         stub = service_pb2_grpc.PromptServiceStub(channel)
         buffer = ""

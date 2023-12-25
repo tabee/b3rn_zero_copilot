@@ -6,6 +6,8 @@ services:
       - "50051:50051" # gRPC-Port (1)
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - redis_cache
     networks:
       - network
   knowledge_base:
@@ -24,6 +26,31 @@ services:
         - network
       depends_on:
         - langchain
+    
+  # redis_cache:
+  #       build: ./langchain-redis
+  #       ports:
+  #         - "6379:6379" # Redis default port
+  #       networks:
+  #         - network
+    
+
+  redis_cache:
+      image: redis:alpine
+      ports:
+        - "6379:6379" # Redis default port
+      volumes:
+        - "./healthchecks:/healthchecks"
+      healthcheck:
+        test: /healthchecks/redis.sh
+        interval: "5s"
+      networks:
+        - network
+
+
+
+
+
   streamlit:
         build: ./streamlit
         ports:
@@ -32,6 +59,8 @@ services:
           - network
         depends_on:
           - fastapi
+          - knowledge_base
+          - langchain
 
 networks:
   network:

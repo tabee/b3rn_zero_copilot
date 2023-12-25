@@ -5,16 +5,15 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.cache import RedisCache
 from langchain.globals import set_llm_cache
 import redis
+from langchain.cache import RedisSemanticCache
+from langchain.embeddings import OpenAIEmbeddings
+import langchain
 
-REDIS_URL = "redis://langchain-redis:6379"
 
-def agent_for(topic="Elefanten", redis_url=REDIS_URL):
+
+def agent_for(topic="Elefanten"):
     '''Agent, der eine Geschichte über ein Thema erzählt'''
-    
-    # Erstellen Sie eine Redis-Client-Instanz
-    redis_client = redis.Redis.from_url(redis_url)
-    set_llm_cache(RedisCache(redis_client))
-    print(f"Redis-Client: {redis_client}")
+
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -27,7 +26,8 @@ def agent_for(topic="Elefanten", redis_url=REDIS_URL):
             ("human", "{topic}"),
             ]
         )
-    model = ChatOpenAI(temperature=0.4, model="gpt-3.5-turbo-0301")
+    
+    model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",n=1)
     runnable = (
         {"topic": RunnablePassthrough()} | prompt | model | StrOutputParser()
     )
@@ -36,6 +36,5 @@ def agent_for(topic="Elefanten", redis_url=REDIS_URL):
         yield chunks
 
 if __name__ == "__main__":
-    print("Finaly... ggg Go go:\n")
     for chunk in agent_for(topic="Elefanten"):
         print(chunk, end="", flush=True)

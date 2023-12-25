@@ -1,5 +1,6 @@
 openai
 langchain
+numexpr
 faiss-cpu
 tiktoken
 grpcio

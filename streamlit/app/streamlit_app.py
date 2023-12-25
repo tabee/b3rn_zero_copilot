@@ -130,7 +130,7 @@ else:
         for msg in st.session_state.messages:
             st.chat_message(msg["role"]).write(msg["content"])
 
-        final_answer = asyncio.run(call_agent_for_grpc(parameter=prompt))
+        final_answer = asyncio.run(call_agent_for_grpc(parameter=str(st.session_state.messages)))
         #Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": final_answer})
     

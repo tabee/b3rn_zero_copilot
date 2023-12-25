@@ -1,6 +1,7 @@
 openai
 langchain
 numexpr
+duckduckgo-search
 faiss-cpu
 tiktoken
 grpcio

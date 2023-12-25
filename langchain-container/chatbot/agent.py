@@ -6,13 +6,13 @@ from langchain.cache import RedisCache
 from langchain.globals import set_llm_cache
 import redis
 
-REDIS_URL = "redis://redis_cache:6379"
+REDIS_URL = "redis://langchain-redis:6379"
 
-def agent_for(topic="Elefanten"):
+def agent_for(topic="Elefanten", redis_url=REDIS_URL):
     '''Agent, der eine Geschichte über ein Thema erzählt'''
     
     # Erstellen Sie eine Redis-Client-Instanz
-    redis_client = redis.Redis.from_url(REDIS_URL)
+    redis_client = redis.Redis.from_url(redis_url)
     set_llm_cache(RedisCache(redis_client))
     print(f"Redis-Client: {redis_client}")
 

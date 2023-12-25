@@ -7,7 +7,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
-      - redis_cache
+      - langchain-redis
     networks:
       - network
   knowledge_base:
@@ -27,7 +27,7 @@ services:
       depends_on:
         - langchain
     
-  # redis_cache:
+  # langchain-redis:
   #       build: ./langchain-redis
   #       ports:
   #         - "6379:6379" # Redis default port
@@ -35,7 +35,7 @@ services:
   #         - network
     
 
-  redis_cache:
+  langchain-redis:
       image: redis:alpine
       ports:
         - "6379:6379" # Redis default port

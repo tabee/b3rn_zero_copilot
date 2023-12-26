@@ -62,7 +62,7 @@ def init_bsv_admin_ch_vectorstore_openai():
          selected_languages=['de'])
 
 
-def _get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None):
+def _get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None, filter_typ='question'):
     '''Get suggestions based on input text. '''
     faiss_db = FAISS.load_local(path_to_vetorestore, embeddings)
     categories = None
@@ -70,7 +70,7 @@ def _get_suggestions_questions(input_text, languages=None, categories=None, embe
         results_with_scores_filtered = faiss_db.similarity_search(
             input_text,
             k=k,
-            filter={'type': 'question'},
+            filter={'type': filter_typ},
             fetch_k=10)
         list_of_questions = [result.page_content for result in results_with_scores_filtered]
         return list_of_questions
@@ -78,6 +78,9 @@ def _get_suggestions_questions(input_text, languages=None, categories=None, embe
         # @todo: implement category filter
         return None
 def get_suggestions_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=5):
+    '''Get suggestions based on input text. '''
+    return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
+def get_suggestions_answers_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=6, filter_typ='question-answer'):
     '''Get suggestions based on input text. '''
     return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
 def get_suggestions_questions_local(input_text, languages=None, categories=None, embeddings=None, k=5):

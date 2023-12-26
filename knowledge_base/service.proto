@@ -21,6 +21,7 @@ service DatabaseHandlerService {
     rpc GetSuggestions (GetSuggestionsRequest) returns (GetSuggestionsResponse);
     rpc GetAnswer (GetAnswerRequest) returns (GetAnswerResponse);
     rpc GetSuggestionsVector (GetSuggestionsRequest) returns (GetSuggestionsResponse);
+    rpc GetAnswersQuestionsVector (GetSuggestionsRequest) returns (GetSuggestionsResponse);
     rpc GetSuggestionsVectorLocal (GetSuggestionsRequest) returns (GetSuggestionsResponse);
 }
 

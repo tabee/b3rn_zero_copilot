@@ -6,7 +6,7 @@ import service_pb2
 import service_pb2_grpc
 from content_scraper import WebContentScraper, WebContentScraperEAK
 from database import DatabaseHandler
-from vectorstore import get_suggestions_questions_openai, get_suggestions_questions_local
+from vectorstore import get_suggestions_questions_openai, get_suggestions_questions_local, get_suggestions_answers_questions_openai
 
 data_path = os.getenv('DATA_PATH', default=os.path.join(os.path.dirname(__file__), 'data'))
 db__bsv_admin_ch = DatabaseHandler(f'{data_path}/bsv_faq.db')
@@ -64,6 +64,18 @@ class DatabaseHandlerService(service_pb2_grpc.DatabaseHandlerServiceServicer):
         suggestions = get_suggestions_questions_openai(
             request.topic, request.languages, request.categories)
         return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
+    
+    def GetAnswersQuestionsVector(self, request, context):
+        # Hier die Logik zur Abfrage der Vektor-Datenbank
+        suggestions = get_suggestions_answers_questions_openai(
+            request.topic, request.languages, request.categories)
+        return service_pb2.GetSuggestionsResponse(suggestions=suggestions)
+
+
+
+
+
+
     def GetSuggestionsVectorLocal(self, request, context):
         # Hier die Logik zur Abfrage der Vektor-Datenbank
         suggestions = get_suggestions_questions_local(

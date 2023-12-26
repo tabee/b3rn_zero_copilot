@@ -3,7 +3,8 @@ from concurrent import futures
 import grpc
 import service_pb2
 import service_pb2_grpc
-from agent import agent_for
+#from agent import agent_for
+from agent2 import agent_for
 
 class PromptService(service_pb2_grpc.PromptServiceServicer):
     '''The gRPC service implementation.'''

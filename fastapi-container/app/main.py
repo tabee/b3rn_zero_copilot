@@ -123,7 +123,35 @@ def call_sqlite_database_for_answer(
         return response.answer
 
 
+@app.get("/vectorstore/answers-questions/{topic}")
+def call_vectorstore_for_faq(
+    topic: str = Path(..., description="Text, für den Frage-Vorschläge abgerufen werden sollen.")
+):
+    """
+    Ruft eine Vectorstore von Frage-Vorschlägen basierend auf dem angegebenen Thema ab.
 
+    Vorteil: Vektorbasierte Suche, die auch ähnliche Fragen findet.
+    Nachteil: langsam
+
+    Dieser Endpoint kommuniziert mit einem gRPC-basierten Microservice, um relevante 
+    Fragen und Antworten zu einem bestimmten Thema zu erhalten.
+
+    Args:
+        topic (str): Das Thema, für das Vorschläge abgerufen werden sollen.
+
+    Returns:
+        SuggestionResponse: Eine Liste von Vorschlägen als Strings.
+    """
+    with grpc.insecure_channel('knowledge_base:50052') as channel:
+        stub = service_pb2_grpc.DatabaseHandlerServiceStub(channel)
+        response = stub.GetAnswersQuestionsVector(service_pb2.GetSuggestionsRequest(
+            topic=topic,
+            languages=None,
+            categories=None))
+        # Extrahiert die Liste von Vorschlägen als reine Python-Liste
+        suggestions = [suggestion for suggestion in response.suggestions]
+        print("GetAnswersQuestionsVector received: ", suggestions)
+        return suggestions
 
 
 @app.get("/vectorstore/suggest/{topic}")

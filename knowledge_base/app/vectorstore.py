@@ -91,7 +91,7 @@ def get_suggestions_questions_local(input_text, languages=None, categories=None,
 if __name__ == '__main__':
     # init vectorstores
     # init_bsv_admin_ch_vectorstore_local()
-    init_bsv_admin_ch_vectorstore_openai()
+   # init_bsv_admin_ch_vectorstore_openai()
 
     user_input = """ AHV21 """
     print(f"\ninput: {user_input}\n")

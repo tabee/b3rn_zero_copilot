@@ -59,7 +59,7 @@ def init_bsv_admin_ch_vectorstore_openai():
     _ignite_vectorstore(database_handler=DatabaseHandler(DB_PATH__BSV_ADMIN_CH),
          embeddings=OpenAIEmbeddings(),
          path_to_vetorestore=DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI,
-         selected_languages=['de'])
+         selected_languages=["de", "fr"])
 
 
 def _get_suggestions_questions(input_text, languages=None, categories=None, embeddings=None, k=5, path_to_vetorestore=None, filter_typ='question'):
@@ -82,7 +82,7 @@ def get_suggestions_questions_openai(input_text, languages=None, categories=None
     return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
 def get_suggestions_answers_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=6, filter_typ='question-answer'):
     '''Get suggestions based on input text. '''
-    return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
+    return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI, filter_typ=filter_typ)
 def get_suggestions_questions_local(input_text, languages=None, categories=None, embeddings=None, k=5):
     '''Get suggestions based on input text. '''
     return _get_suggestions_questions(input_text, languages, categories, _get_hugging_face_embeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_LOCAL)
@@ -91,7 +91,7 @@ def get_suggestions_questions_local(input_text, languages=None, categories=None,
 if __name__ == '__main__':
     # init vectorstores
     # init_bsv_admin_ch_vectorstore_local()
-    # init_bsv_admin_ch_vectorstore_openai()
+    init_bsv_admin_ch_vectorstore_openai()
 
     user_input = """ AHV21 """
     print(f"\ninput: {user_input}\n")

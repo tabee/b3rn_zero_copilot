@@ -72,15 +72,16 @@ def _get_suggestions_questions(input_text, languages=None, categories=None, embe
             k=k,
             filter={'type': filter_typ},
             fetch_k=10)
-        list_of_questions = [result.page_content for result in results_with_scores_filtered]
-        return list_of_questions
+        list_from_vectorstor = [result.page_content for result in results_with_scores_filtered]
+        print(f"list_from_vectorstor: {list_from_vectorstor}")
+        return list_from_vectorstor
     else:
         # @todo: implement category filter
         return None
 def get_suggestions_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=5):
     '''Get suggestions based on input text. '''
     return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI)
-def get_suggestions_answers_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=6, filter_typ='question-answer'):
+def get_suggestions_answers_questions_openai(input_text, languages=None, categories=None, embeddings=None, k=5, filter_typ='question-answer'):
     '''Get suggestions based on input text. '''
     return _get_suggestions_questions(input_text, languages, categories, OpenAIEmbeddings(), k, DB_PATH__BSV_ADMIN_CH_VECTORSTORE_OPENAI, filter_typ=filter_typ)
 def get_suggestions_questions_local(input_text, languages=None, categories=None, embeddings=None, k=5):

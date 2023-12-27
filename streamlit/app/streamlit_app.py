@@ -98,7 +98,6 @@ async def call_agent_for_grpc(parameter: str):
             return full_response
 
 
-
 with st.sidebar:
     if not 'OPENAI_API_KEY' in os.environ:
         openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")

@@ -38,7 +38,10 @@ def agent_for(topic):
     template = """Answer the question based only on the following context:
     {context}
 
-    Question: {question}
+    context: {question}\n
+    ==========================\n
+    answer always in german. cite the source (context) always in german.
+    if the context not suitable, please answer with "no suitable context".
     """
     prompt = ChatPromptTemplate.from_template(template)
 

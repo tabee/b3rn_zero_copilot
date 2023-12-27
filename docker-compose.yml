@@ -6,8 +6,8 @@ services:
       - "50051:50051" # gRPC-Port (1)
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-    depends_on:
-      - langchain-redis
+    # depends_on:
+    #   - langchain-redis
     networks:
       - network
   knowledge_base:
@@ -26,26 +26,19 @@ services:
         - network
       depends_on:
         - langchain
-    
-  # langchain-redis:
-  #       build: ./langchain-redis
-  #       ports:
-  #         - "6379:6379" # Redis default port
-  #       networks:
-  #         - network
-    
 
-  langchain-redis:
-      image: redis:alpine
-      ports:
-        - "6379:6379" # Redis default port
-      volumes:
-        - "./healthchecks:/healthchecks"
-      healthcheck:
-        test: /healthchecks/redis.sh
-        interval: "5s"
-      networks:
-        - network
+
+  # langchain-redis: 
+  #     image: redis:alpine
+  #     ports:
+  #       - "6379:6379" # Redis default port
+  #     volumes:
+  #       - "./healthchecks:/healthchecks"
+  #     healthcheck:
+  #       test: /healthchecks/redis.sh
+  #       interval: "5s"
+  #     networks:
+  #       - network
 
 
 

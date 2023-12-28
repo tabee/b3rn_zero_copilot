@@ -18,5 +18,4 @@ query_pipeline.connect("text_embedder.embedding", "retriever.query_embedding")
 
 result = query_pipeline.run({"text_embedder": {"text": "Altersrente"}})
 
-# http://localhost:9200/_search?q=Altersrente
 print(result)

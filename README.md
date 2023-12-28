@@ -1,4 +1,4 @@
-# b3rn_zero_copilot
+# b3rn_zero_copilot school
 
 ## Anleitung zum Starten und Testen der Anwendung
 

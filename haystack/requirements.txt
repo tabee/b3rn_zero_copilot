@@ -1,0 +1,4 @@
+haystack-ai
+huggingface_hub
+sentence_transformers
+elasticsearch-haystack

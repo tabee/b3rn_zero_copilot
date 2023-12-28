@@ -10,6 +10,28 @@ services:
     #   - langchain-redis
     networks:
       - network
+
+
+
+
+  haystack:
+    build: ./haystack
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - elasticsearch
+    networks:
+      - network
+
+
+
+
+
+
+
+
+
+
   knowledge_base:
       build: ./knowledge_base
       ports:
@@ -27,23 +49,6 @@ services:
       depends_on:
         - langchain
 
-
-  # langchain-redis: 
-  #     image: redis:alpine
-  #     ports:
-  #       - "6379:6379" # Redis default port
-  #     volumes:
-  #       - "./healthchecks:/healthchecks"
-  #     healthcheck:
-  #       test: /healthchecks/redis.sh
-  #       interval: "5s"
-  #     networks:
-  #       - network
-
-
-
-
-
   streamlit:
         build: ./streamlit
         ports:
@@ -56,6 +61,20 @@ services:
           - fastapi
           - knowledge_base
           - langchain
+
+  # https://geshan.com.np/blog/2023/06/elasticsearch-docker/
+  elasticsearch:
+    image: elasticsearch:8.11.3
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - network
+
+
 
 networks:
   network:

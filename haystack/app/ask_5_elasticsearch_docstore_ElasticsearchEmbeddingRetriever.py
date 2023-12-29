@@ -4,10 +4,11 @@ from elasticsearch_haystack.document_store import ElasticsearchDocumentStore
 from haystack import Pipeline
 from haystack.components.embedders import SentenceTransformersTextEmbedder
 
-document_store = ElasticsearchDocumentStore(hosts= "http://localhost:9200/")
+document_store = ElasticsearchDocumentStore(hosts="http://localhost:9200/")
 
-#model_name_or_path = "BAAI/bge-large-en-v1.5"
 model_name_or_path = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
+#model_name_or_path = "BAAI/bge-large-en-v1.5"
+#model_name_or_path = "jphme/em_german_leo_mistral"
 
 query_pipeline = Pipeline()
 query_pipeline.add_component("text_embedder", SentenceTransformersTextEmbedder(model_name_or_path=model_name_or_path))

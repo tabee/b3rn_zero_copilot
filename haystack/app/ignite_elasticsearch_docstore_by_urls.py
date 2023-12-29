@@ -9,14 +9,15 @@ from haystack.pipeline_utils.indexing import download_files
 document_store = ElasticsearchDocumentStore(hosts = "http://localhost:9200")
 converter = TextFileToDocument()
 splitter = DocumentSplitter()
+
 doc_embedder = SentenceTransformersDocumentEmbedder(model_name_or_path="sentence-transformers/multi-qa-mpnet-base-dot-v1")
+#doc_embedder = SentenceTransformersDocumentEmbedder(model_name_or_path="jphme/em_german_leo_mistral")
 writer = DocumentWriter(document_store)
 
 # Download example files from web
 files = download_files(sources=[
-    #"https://www.eak.admin.ch/eak/de/home/dokumentation/pensionierung/altersrente.html",
-    #"https://www.eak.admin.ch/eak/de/home/reform-ahv21/ueberblick/ausgleichsmassnahmen.html",
-    "https://bee-gu.ch/geschichte.html",])
+    "https://www.eak.admin.ch/eak/de/home/dokumentation/pensionierung/altersrente.html",
+    "https://www.eak.admin.ch/eak/de/home/reform-ahv21/ueberblick/ausgleichsmassnahmen.html",])
 
 # Pipelines are our main abstratcion.
 # Here we create a pipeline that can index TXT and HTML. You can also use your own private files.

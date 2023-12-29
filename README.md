@@ -4,6 +4,11 @@
 
 Diese Anleitung hilft Ihnen dabei, die FastAPI/gRPC-Anwendung in einem Docker-Container zu starten und zu testen.
 
+### Elasticsearch
+```bash
+curl http://localhost:9200/_search?q=Altersrente
+````
+
 ### Voraussetzungen
 
 - Docker und Docker Compose müssen auf Ihrem System installiert sein.

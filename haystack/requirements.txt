@@ -1,5 +1,8 @@
-haystack-ai
-huggingface_hub
-sentence_transformers
-elasticsearch-haystack
-ipywidgets
+# haystack-ai
+# huggingface_hub
+# sentence_transformers
+# elasticsearch-haystack
+# ipywidgets
+
+# for 24_building_chat_app:
+farm-haystack
